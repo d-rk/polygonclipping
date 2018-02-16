@@ -1,0 +1,2 @@
+# polygonclipping
+polygon clipping library
