@@ -18,8 +18,11 @@ public class Contour {
      */
     private List<Integer> holes = new ArrayList<>();
 
-    private boolean external; // is the contour an external contour? (i.e., is it not a hole?)
-    private Boolean precomputedCC;
+    // is this contour a hole? (i.e. not an external contour)
+    private boolean isHole = true;
+
+    // is contour counterClockwise? (lazily initialized)
+    private Boolean isCounterClockwise;
 
     public BoundingBox boundingBox() {
         BoundingBox boundingBox = new BoundingBox();
@@ -28,32 +31,32 @@ public class Contour {
     }
 
     public boolean clockwise() {
-        return !counterclockwise();
+        return !counterClockwise();
     }
 
-    public boolean counterclockwise() {
-        if (precomputedCC != null) {
-            return precomputedCC;
+    public boolean counterClockwise() {
+        if (isCounterClockwise != null) {
+            return isCounterClockwise;
         }
 
         double area = 0.0;
         int n = points.size();
 
         // https://en.wikipedia.org/wiki/Shoelace_formula
-        for (int i=0; i < n; i++) {
+        for (int i = 0; i < n; i++) {
             int i_next = (i + 1) % n;
             area += (points.get(i).y + points.get(i_next).y) * ((points.get(i).x - points.get(i_next).x));
         }
 
-        precomputedCC = (area >= 0.0);
-        return precomputedCC;
+        isCounterClockwise = (area >= 0.0);
+        return isCounterClockwise;
     }
 
-    public int nvertices() {
+    public int pointCount() {
         return points.size();
     }
 
-    public int nedges() {
+    public int edgeCount() {
         return points.size();
     }
 
@@ -64,7 +67,7 @@ public class Contour {
         });
     }
 
-    public Segment segment (int p) {
+    public Segment segment(int p) {
         int lastPointIdx = points.size() - 1;
 
         if (p == lastPointIdx) {
@@ -75,7 +78,7 @@ public class Contour {
     }
 
     public void setClockwise() {
-        if (counterclockwise()) changeOrientation();
+        if (counterClockwise()) changeOrientation();
     }
 
     public void setCounterClockwise() {
@@ -84,7 +87,7 @@ public class Contour {
 
     public void changeOrientation() {
         Collections.reverse(points);
-        precomputedCC = precomputedCC != null ? !precomputedCC : null;
+        isCounterClockwise = isCounterClockwise != null ? !isCounterClockwise : null;
     }
 
     public void add(Point p) {
@@ -108,7 +111,7 @@ public class Contour {
         return points.get(p);
     }
 
-    public Point back() {
+    public Point lastPoint() {
         return points.get(points.size() - 1);
     }
 
@@ -116,7 +119,7 @@ public class Contour {
         holes.add(ind);
     }
 
-    public int nholes() {
+    public int holeCount() {
         return holes.size();
     }
 
@@ -124,12 +127,12 @@ public class Contour {
         return holes.get(p);
     }
 
-    public boolean isExternal() {
-        return external;
+    public boolean isHole() {
+        return isHole;
     }
 
-    public void setExternal(boolean e) {
-        external = e;
+    public void setIsHole(boolean isHole) {
+        this.isHole = isHole;
     }
 
     public void serialize(PrintWriter writer) {
@@ -149,8 +152,8 @@ public class Contour {
         Contour copy = new Contour();
         copy.points = points.stream().map(Point::copy).collect(Collectors.toList());
         copy.holes.addAll(holes);
-        copy.external = external;
-        copy.precomputedCC = precomputedCC;
+        copy.isHole = isHole;
+        copy.isCounterClockwise = isCounterClockwise;
         return copy;
     }
 }

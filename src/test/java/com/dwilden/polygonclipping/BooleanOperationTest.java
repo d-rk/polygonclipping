@@ -26,7 +26,7 @@ public class BooleanOperationTest {
 
         Contour contour = result.contour(0);
         assertThat(contour.getHoles()).isEmpty();
-        assertThat(contour.nvertices()).isEqualTo(3);
+        assertThat(contour.pointCount()).isEqualTo(3);
         assertThat(contour.getPoint(0).x).isCloseTo(0.5, ALLOWED_OFFSET);
         assertThat(contour.getPoint(0).y).isCloseTo(0.0, ALLOWED_OFFSET);
         assertThat(contour.getPoint(1).x).isCloseTo(0.9083333, ALLOWED_OFFSET);

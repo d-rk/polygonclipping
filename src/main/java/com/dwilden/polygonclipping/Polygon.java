@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Polygon {
+
     private List<Contour> contours = new ArrayList<>();
 
     public Polygon() {
@@ -25,29 +26,29 @@ public class Polygon {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             // read the contours
-            int ncontours = ReaderUtil.toInt(reader.readLine());
+            int contourCount = ReaderUtil.toInt(reader.readLine());
 
-            for (int i = 0; i < ncontours; i++) {
+            for (int i = 0; i < contourCount; i++) {
                 Contour contour = new Contour();
                 contours.add(contour);
 
-                int npoints = ReaderUtil.toInt(reader.readLine());
+                int pointCount = ReaderUtil.toInt(reader.readLine());
 
-                for (int j = 0; j < npoints; j++) {
+                for (int j = 0; j < pointCount; j++) {
                     List<Double> coords = ReaderUtil.toDoubleList(reader.readLine());
                     double px = coords.get(0);
                     double py = coords.get(1);
 
-                    if (j > 0 && px == contour.back().x && py == contour.back().y) {
+                    if (j > 0 && px == contour.lastPoint().x && py == contour.lastPoint().y) {
                         continue;
                     }
-                    if (j == npoints - 1 && px == contour.getPoint(0).x && py == contour.getPoint(0).y) {
+                    if (j == pointCount - 1 && px == contour.getPoint(0).x && py == contour.getPoint(0).y) {
                         continue;
                     }
 
                     contour.add(new Point(px, py));
                 }
-                if (contour.nvertices() < 3) {
+                if (contour.pointCount() < 3) {
                     // not a valid contour, remove it
                     popBack();
                 }
@@ -60,9 +61,9 @@ public class Polygon {
                 int contourId = ReaderUtil.toInt(parts[0]);
                 List<Integer> holes = ReaderUtil.toIntegerList(parts[1]);
 
-                holes.forEach(h -> {
-                    contour(contourId).addHole(h);
-                    contour(h).setExternal(false);
+                holes.forEach(hole -> {
+                    contour(contourId).addHole(hole);
+                    contour(hole).setIsHole(true);
                 });
             }
         }
@@ -94,7 +95,7 @@ public class Polygon {
     public int nvertices() {
         int nv = 0;
         for (int i = 0; i < contours.size(); i++)
-            nv += contours.get(i).nvertices();
+            nv += contours.get(i).pointCount();
         return nv;
     }
 
@@ -163,7 +164,7 @@ public class Polygon {
 
         for (int i = 0; i < contours.size(); i++) {
             contour(i).setCounterClockwise();
-            for (int j = 0; j < contour(i).nedges(); j++) {
+            for (int j = 0; j < contour(i).edgeCount(); j++) {
                 Segment s = contour(i).segment(j);
                 if (s.isVertical()) { // vertical segments are not processed
                     continue;
@@ -214,18 +215,18 @@ public class Polygon {
                     } else {
                         if (!prev.inOut){
                             holeOf.set(e.polygon, prev.polygon);
-                            contour(e.polygon).setExternal(false);
+                            contour(e.polygon).setIsHole(true);
                             contour(prev.polygon).addHole(e.polygon);
-                            if (contour(prev.polygon).counterclockwise()) {
+                            if (contour(prev.polygon).counterClockwise()) {
                                 contour(e.polygon).setClockwise();
                             } else {
                                 contour(e.polygon).setCounterClockwise();
                             }
                         } else if (holeOf.get(prev.polygon) !=-1){
                             holeOf.set(e.polygon, holeOf.get(prev.polygon));
-                            contour(e.polygon).setExternal(false);
+                            contour(e.polygon).setIsHole(true);
                             contour(holeOf.get(e.polygon)).addHole(e.polygon);
-                            if (contour(holeOf.get(e.polygon)).counterclockwise()) {
+                            if (contour(holeOf.get(e.polygon)).counterClockwise()) {
                                 contour(e.polygon).setClockwise();
                             } else {
                                 contour(e.polygon).setCounterClockwise();
@@ -258,7 +259,7 @@ public class Polygon {
             for (int i = 0; i < contours.size(); i++) {
                 Contour c = contours.get(i);
 
-                if (c.nholes() > 0) {
+                if (c.holeCount() > 0) {
                     String holes = c.getHoles().stream().map(String::valueOf).collect(Collectors.joining(" "));
                     writer.println(i + ": " + holes);
                 }

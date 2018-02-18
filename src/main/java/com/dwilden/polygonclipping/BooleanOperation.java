@@ -42,13 +42,13 @@ public class BooleanOperation {
         }
 
         for (int i = 0; i < subject.ncontours(); i++) {
-            for (int j = 0; j < subject.contour(i).nvertices(); j++) {
+            for (int j = 0; j < subject.contour(i).pointCount(); j++) {
                 processSegment(subject.contour(i).segment(j), PolygonType.SUBJECT);
             }
         }
 
         for (int i = 0; i < clipping.ncontours(); i++) {
-            for (int j = 0; j < clipping.contour(i).nvertices(); j++) {
+            for (int j = 0; j < clipping.contour(i).pointCount(); j++) {
                 processSegment(clipping.contour(i).segment(j), PolygonType.CLIPPING);
             }
         }
@@ -379,12 +379,12 @@ public class BooleanOperation {
                     result.contour(lowerContourId).addHole(contourId);
                     holeOf.set(contourId, lowerContourId);
                     depth.set(contourId, depth.get(lowerContourId) + 1);
-                    contour.setExternal(false);
-                } else if (!result.contour(lowerContourId).isExternal()) {
+                    contour.setIsHole(true);
+                } else if (result.contour(lowerContourId).isHole()) {
                     result.contour(holeOf.get(lowerContourId)).addHole(contourId);
                     holeOf.set(contourId, holeOf.get(lowerContourId));
                     depth.set(contourId, depth.get(lowerContourId));
-                    contour.setExternal(false);
+                    contour.setIsHole(true);
                 }
             }
 
