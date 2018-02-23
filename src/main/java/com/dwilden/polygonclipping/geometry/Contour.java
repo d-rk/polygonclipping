@@ -1,4 +1,6 @@
-package com.dwilden.polygonclipping;
+package com.dwilden.polygonclipping.geometry;
+
+import com.dwilden.polygonclipping.segment.Segment;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -67,13 +69,13 @@ public class Contour {
         });
     }
 
-    public Segment segment(int p) {
+    public Segment segment(int index) {
         int lastPointIdx = points.size() - 1;
 
-        if (p == lastPointIdx) {
+        if (index == lastPointIdx) {
             return new Segment(points.get(lastPointIdx), points.get(0));
         } else {
-            return new Segment(points.get(p), points.get(p + 1));
+            return new Segment(points.get(index), points.get(index + 1));
         }
     }
 
@@ -94,8 +96,8 @@ public class Contour {
         points.add(p);
     }
 
-    public void remove(int i) {
-        points.remove(i);
+    public void remove(int index) {
+        points.remove(index);
     }
 
     public void clear() {
@@ -107,8 +109,8 @@ public class Contour {
         holes.clear();
     }
 
-    public Point getPoint(int p) {
-        return points.get(p);
+    public Point getPoint(int index) {
+        return points.get(index);
     }
 
     public Point lastPoint() {
@@ -123,8 +125,8 @@ public class Contour {
         return holes.size();
     }
 
-    public int getHole(int p) {
-        return holes.get(p);
+    public int getHole(int index) {
+        return holes.get(index);
     }
 
     public boolean isHole() {

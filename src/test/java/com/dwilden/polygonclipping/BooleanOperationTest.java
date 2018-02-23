@@ -1,6 +1,6 @@
 package com.dwilden.polygonclipping;
 
-import com.dwilden.polygonclipping.enums.BooleanOperationType;
+import com.dwilden.polygonclipping.geometry.Contour;
 import org.assertj.core.data.Offset;
 import org.junit.Test;
 
@@ -19,10 +19,10 @@ public class BooleanOperationTest {
         Polygon subj = new Polygon(BooleanOperationTest.class.getResourceAsStream("/polygons/samples/rectangle1"));
         Polygon clip = new Polygon(BooleanOperationTest.class.getResourceAsStream("/polygons/samples/triangle2"));
 
-        Polygon result = new BooleanOperation(subj, clip, BooleanOperationType.INTERSECTION).execute();
+        Polygon result = new BooleanOperation(subj, clip, BooleanOperation.Type.INTERSECTION).execute();
 
         assertThat(result).isNotNull();
-        assertThat(result.ncontours()).isEqualTo(1);
+        assertThat(result.contourCount()).isEqualTo(1);
 
         Contour contour = result.contour(0);
         assertThat(contour.getHoles()).isEmpty();

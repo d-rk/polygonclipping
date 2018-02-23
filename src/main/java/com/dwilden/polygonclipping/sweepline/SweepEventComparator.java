@@ -1,14 +1,14 @@
 package com.dwilden.polygonclipping.sweepline;
 
+import com.dwilden.polygonclipping.geometry.Triangle;
+
 import java.util.Comparator;
 
-import static com.dwilden.polygonclipping.Utilities.signedArea;
-
-public class SweepEventComp implements Comparator<SweepEvent> {
+public class SweepEventComparator implements Comparator<SweepEvent> {
 
     private final boolean reverse;
 
-    public SweepEventComp(boolean reverse) {
+    public SweepEventComparator(boolean reverse) {
         this.reverse = reverse;
     }
 
@@ -35,9 +35,9 @@ public class SweepEventComp implements Comparator<SweepEvent> {
         if (e1.left != e2.left) {
             return !e1.left ? direction : -direction;
         }
-        // Same point, both events are left endpoints or both are right endpoints.
 
-        if (signedArea(e1.point, e1.otherEvent.point, e2.otherEvent.point) != 0) { // not collinear
+        // Same point, both events are left endpoints or both are right endpoints.
+        if (Triangle.signedArea(e1.point, e1.otherEvent.point, e2.otherEvent.point) != 0) { // not collinear
             if (reverse) {
                 return e1.below(e2.otherEvent.point) ? direction : -direction;
             } else {

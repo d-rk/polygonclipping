@@ -1,4 +1,4 @@
-package com.dwilden.polygonclipping;
+package com.dwilden.polygonclipping.geometry;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

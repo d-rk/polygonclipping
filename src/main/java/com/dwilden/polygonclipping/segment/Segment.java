@@ -1,5 +1,6 @@
-package com.dwilden.polygonclipping;
+package com.dwilden.polygonclipping.segment;
 
+import com.dwilden.polygonclipping.geometry.Point;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode

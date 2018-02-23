@@ -1,29 +1,37 @@
 package com.dwilden.polygonclipping;
 
-import com.dwilden.polygonclipping.enums.BooleanOperationType;
 import com.dwilden.polygonclipping.enums.EdgeType;
 import com.dwilden.polygonclipping.enums.PolygonType;
+import com.dwilden.polygonclipping.geometry.BoundingBox;
+import com.dwilden.polygonclipping.geometry.Contour;
+import com.dwilden.polygonclipping.geometry.Intersection;
+import com.dwilden.polygonclipping.geometry.Point;
+import com.dwilden.polygonclipping.segment.Segment;
+import com.dwilden.polygonclipping.segment.SegmentComparator;
 import com.dwilden.polygonclipping.sweepline.SweepEvent;
-import com.dwilden.polygonclipping.sweepline.SweepEventComp;
+import com.dwilden.polygonclipping.sweepline.SweepEventComparator;
 import com.dwilden.polygonclipping.sweepline.SweepLine;
 
 import java.util.*;
 
-import static com.dwilden.polygonclipping.Utilities.findIntersection;
-import static com.dwilden.polygonclipping.enums.BooleanOperationType.*;
+import static com.dwilden.polygonclipping.BooleanOperation.Type.*;
 
 public class BooleanOperation {
+
+    public enum Type {
+        INTERSECTION, UNION, DIFFERENCE, XOR
+    }
 
     private Polygon subject;
     private Polygon clipping;
     private Polygon result;
-    private BooleanOperationType operation;
+    private Type operation;
 
-    private SweepLine sweepLine = new SweepLine(false);
-    private SweepEventComp sec = new SweepEventComp(false);                    // to compare events
+    private SweepEventComparator sweepEventComparator = new SweepEventComparator(false); // to compare events
+    private SweepLine sweepLine = new SweepLine(new SegmentComparator(false));
     private Deque<SweepEvent> sortedEvents = new LinkedList<>();
 
-    BooleanOperation(Polygon subject, Polygon clip, BooleanOperationType operation) {
+    BooleanOperation(Polygon subject, Polygon clip, BooleanOperation.Type operation) {
         this.subject = subject.copy();
         this.clipping = clip.copy();
         this.operation = operation;
@@ -41,13 +49,13 @@ public class BooleanOperation {
             return result;
         }
 
-        for (int i = 0; i < subject.ncontours(); i++) {
+        for (int i = 0; i < subject.contourCount(); i++) {
             for (int j = 0; j < subject.contour(i).pointCount(); j++) {
                 processSegment(subject.contour(i).segment(j), PolygonType.SUBJECT);
             }
         }
 
-        for (int i = 0; i < clipping.ncontours(); i++) {
+        for (int i = 0; i < clipping.contourCount(); i++) {
             for (int j = 0; j < clipping.contour(i).pointCount(); j++) {
                 processSegment(clipping.contour(i).segment(j), PolygonType.CLIPPING);
             }
@@ -56,8 +64,8 @@ public class BooleanOperation {
         while (!sweepLine.eventQueue.isEmpty()) {
             SweepEvent se = sweepLine.eventQueue.poll();
             // optimization 2
-            if ((operation == INTERSECTION && se.point.x > MINMAXX) ||
-                    (operation == DIFFERENCE && se.point.x > subjectBB.xMax)) {
+            if ((INTERSECTION.equals(operation) && se.point.x > MINMAXX) ||
+                    (DIFFERENCE.equals(operation) && se.point.x > subjectBB.xMax)) {
                 connectEdges();
                 return result;
             }
@@ -80,7 +88,7 @@ public class BooleanOperation {
                 }
                 // Process a possible intersection between "se" and its previous neighbor in sl
                 if (prev != null) {
-                    if (possibleIntersection(prev,se) ==2){
+                    if (possibleIntersection(prev, se) == 2) {
                         SweepEvent prevPrev = sweepLine.statusLine.getPreviousEvent(prev);
                         computeFields(prev, prevPrev);
                         computeFields(se, prev);
@@ -110,10 +118,10 @@ public class BooleanOperation {
 
         // Test 1 for trivial result case (at least one of the polygons is empty)
         if (subject.isEmpty() || clipping.isEmpty()) {
-            if (operation == DIFFERENCE) {
+            if (DIFFERENCE.equals(operation)) {
                 result = subject;
             }
-            if (operation == UNION || operation == XOR) {
+            if (UNION.equals(operation) || XOR.equals(operation)) {
                 result = subject.isEmpty() ? clipping : subject;
             }
             return true;
@@ -121,10 +129,10 @@ public class BooleanOperation {
         // Test 2 for trivial result case (the bounding boxes do not overlap)
         if (subjectBB.xMin > clippingBB.xMax || clippingBB.xMin > subjectBB.xMax ||
                 subjectBB.yMin > clippingBB.yMax || clippingBB.yMin > subjectBB.yMax) {
-            if (operation == DIFFERENCE) {
+            if (DIFFERENCE.equals(operation)) {
                 result = subject;
             }
-            if (operation == UNION || operation == XOR) {
+            if (UNION.equals(operation) || XOR.equals(operation)) {
                 result = subject;
                 result.join(clipping);
             }
@@ -142,8 +150,8 @@ public class BooleanOperation {
 //            // This can be done as preprocessing to avoid "polygons" with less than 3 edges */
 //            return;
 //        }
-        SweepEvent e1 = new SweepEvent(true, s.pBegin, null, pt);
-        SweepEvent e2 = new SweepEvent(true, s.pEnd, e1, pt);
+        SweepEvent e1 = new SweepEvent(s.pBegin, true, null, pt);
+        SweepEvent e2 = new SweepEvent(s.pEnd, true, e1, pt);
         e1.otherEvent = e2;
 
         if (s.min().equals(s.pBegin)) {
@@ -166,31 +174,31 @@ public class BooleanOperation {
 //            return 0;
 //        }
 
-        IntersectionResult intersections = findIntersection(le1.segment(), le2.segment());
+        Intersection intersections = new Intersection(le1.segment(), le2.segment());
 
-        if (intersections.intersections == 0) {
+        if (Intersection.Type.NO_INTERSECTION.equals(intersections.type)) {
             // no intersection
             return 0;
         }
 
-        if ((intersections.intersections == 1) && ((le1.point.equals(le2.point)) || (le1.otherEvent.point.equals(le2.otherEvent.point)))) {
+        if ((Intersection.Type.POINT.equals(intersections.type)) && ((le1.point.equals(le2.point)) || (le1.otherEvent.point.equals(le2.otherEvent.point)))) {
             // the line segments intersect at an endpoint of both line segments
             return 0;
         }
 
-        if (intersections.intersections == 2 && le1.polygonType.equals(le2.polygonType)) {
+        if (Intersection.Type.OVERLAPPING.equals(intersections.type) && le1.polygonType.equals(le2.polygonType)) {
             throw new IllegalStateException("edges of the same polygon overlap");
         }
 
         // The line segments associated to le1 and le2 intersect
-        if (intersections.intersections == 1) {
-            if (!le1.point.equals(intersections.pi0) && !le1.otherEvent.point.equals(intersections.pi0)) {
+        if (Intersection.Type.POINT.equals(intersections.type)) {
+            if (!le1.point.equals(intersections.point) && !le1.otherEvent.point.equals(intersections.point)) {
                 // if the intersection point is not an endpoint of le1.segment ()
-                divideSegment(le1, intersections.pi0);
+                divideSegment(le1, intersections.point);
             }
-            if (!le2.point.equals(intersections.pi0) && !le2.otherEvent.point.equals(intersections.pi0)) {
+            if (!le2.point.equals(intersections.point) && !le2.otherEvent.point.equals(intersections.point)) {
                 // if the intersection point is not an endpoint of le2.segment ()
-                divideSegment(le2, intersections.pi0);
+                divideSegment(le2, intersections.point);
             }
             return 1;
         }
@@ -199,7 +207,7 @@ public class BooleanOperation {
 
         if (le1.point.equals(le2.point)) {
             sortedEvents.add(null);
-        } else if (sec.compare(le1, le2) < 0) {
+        } else if (sweepEventComparator.compare(le1, le2) < 0) {
             sortedEvents.add(le2);
             sortedEvents.add(le1);
         } else {
@@ -208,7 +216,7 @@ public class BooleanOperation {
         }
         if (le1.otherEvent.point.equals(le2.otherEvent.point)) {
             sortedEvents.add(null);
-        } else if (sec.compare(le1.otherEvent, le2.otherEvent) < 0) {
+        } else if (sweepEventComparator.compare(le1.otherEvent, le2.otherEvent) < 0) {
             sortedEvents.add(le2.otherEvent);
             sortedEvents.add(le1.otherEvent);
         } else {
@@ -247,10 +255,10 @@ public class BooleanOperation {
     private void divideSegment(SweepEvent le, Point p) {
 
         // "Right event" of the "left line segment" resulting from dividing le->segment ()
-        SweepEvent r = new SweepEvent(false, p, le, le.polygonType);
+        SweepEvent r = new SweepEvent(p, false, le, le.polygonType);
         // "Left event" of the "right line segment" resulting from dividing le->segment ()
-        SweepEvent l = new SweepEvent(true, p, le.otherEvent, le.polygonType);
-        if (sec.compare(l, le.otherEvent) < 0) { // avoid a rounding error. The left event would be processed after the right event
+        SweepEvent l = new SweepEvent(p, true, le.otherEvent, le.polygonType);
+        if (sweepEventComparator.compare(l, le.otherEvent) < 0) { // avoid a rounding error. The left event would be processed after the right event
             le.otherEvent.left = true;
             l.left = false;
         }
@@ -322,15 +330,15 @@ public class BooleanOperation {
             }
         }
 
-        //TODO refactor sweepEventComp
-        SweepEventComp sec2 = new SweepEventComp(true);                    // to compare events
+        //TODO refactor sweepEventComparator
+        SweepEventComparator sec2 = new SweepEventComparator(true);                    // to compare events
 
         // Due to overlapping edges the resultEvents array can be not wholly sorted
         boolean sorted = false;
         while (!sorted) {
             sorted = true;
 
-            for (int i = 0; i < resultEvents.size()-1; ++i) {
+            for (int i = 0; i < resultEvents.size() - 1; ++i) {
                 SweepEvent event = resultEvents.get(i);
                 SweepEvent nextEvent = resultEvents.get(i + 1);
 
@@ -367,9 +375,9 @@ public class BooleanOperation {
             }
 
             Contour contour = new Contour();
-            result.add(contour);
+            result.addContour(contour);
 
-            int contourId = result.ncontours() - 1;
+            int contourId = result.contourCount() - 1;
             depth.add(0);
             holeOf.add(-1);
 

@@ -1,9 +1,13 @@
 package com.dwilden.polygonclipping;
 
 
+import com.dwilden.polygonclipping.geometry.BoundingBox;
+import com.dwilden.polygonclipping.geometry.Contour;
+import com.dwilden.polygonclipping.geometry.Point;
+import com.dwilden.polygonclipping.segment.Segment;
+import com.dwilden.polygonclipping.segment.SegmentComparator;
 import com.dwilden.polygonclipping.sweepline.SweepEvent;
-import com.dwilden.polygonclipping.sweepline.SweepEventComp;
-import com.dwilden.polygonclipping.sweepline.SweepLineStatus;
+import com.dwilden.polygonclipping.sweepline.SweepLine;
 import com.dwilden.polygonclipping.utils.ReaderUtil;
 
 import java.io.*;
@@ -50,7 +54,7 @@ public class Polygon {
                 }
                 if (contour.pointCount() < 3) {
                     // not a valid contour, remove it
-                    popBack();
+                    removeLastContour();
                 }
             }
 
@@ -71,17 +75,11 @@ public class Polygon {
         inputStream.close();
     }
 
-    /**
-     * Get the p-th contour
-     */
     public Contour contour(int p) {
         return contours.get(p);
     }
 
-    /**
-     * Number of contours
-     */
-    public int ncontours() {
+    public int contourCount() {
         return contours.size();
     }
 
@@ -89,14 +87,8 @@ public class Polygon {
         return contours.isEmpty();
     }
 
-    /**
-     * Number of vertices
-     */
-    public int nvertices() {
-        int nv = 0;
-        for (int i = 0; i < contours.size(); i++)
-            nv += contours.get(i).pointCount();
-        return nv;
+    public int pointCount() {
+        return contours.stream().mapToInt(Contour::pointCount).sum();
     }
 
     public BoundingBox boundingBox() {
@@ -116,10 +108,10 @@ public class Polygon {
         Polygon polygonCopy = polygon.copy();
 
         for (Contour contour : polygonCopy.contours) {
-            add(contour);
+            addContour(contour);
 
             // shift the hole indices
-            contour.setHoles(contour.getHoles().stream().map(h -> h + ncontours()).collect(Collectors.toList()));
+            contour.setHoles(contour.getHoles().stream().map(h -> h + contourCount()).collect(Collectors.toList()));
         }
     }
 
@@ -129,19 +121,19 @@ public class Polygon {
         return copy;
     }
 
-    public void add(Contour contour) {
+    public void addContour(Contour contour) {
         contours.add(contour);
     }
 
-    public Contour back() {
+    public Contour lastContour() {
         return contours.get(contours.size() - 1);
     }
 
-    public void popBack() {
+    public void removeLastContour() {
         contours.remove(contours.size() - 1);
     }
 
-    public void remove(int i) {
+    public void removeContour(int i) {
         contours.remove(i);
     }
 
@@ -160,7 +152,7 @@ public class Polygon {
             return;
         }
 
-        List<SweepEvent> sweepEvents = new ArrayList<>(nvertices() * 2);
+        SweepLine sweepLine = new SweepLine(new SegmentComparator(true));
 
         for (int i = 0; i < contours.size(); i++) {
             contour(i).setCounterClockwise();
@@ -184,69 +176,56 @@ public class Polygon {
                 sBegin.otherEvent = sEnd;
                 sEnd.otherEvent = sBegin;
 
-                sweepEvents.add(sBegin);
-                sweepEvents.add(sEnd);
+                sweepLine.eventQueue.add(sBegin);
+                sweepLine.eventQueue.add(sEnd);
             }
         }
 
-        sweepEvents.sort(new SweepEventComp(true));
-
-        SweepLineStatus SL = new SweepLineStatus(true);
         Set<Integer> processedPolygons = new HashSet<>(contours.size());
-        List<Integer> holeOf = new ArrayList<>(contours.size());
+        Map<Integer, Integer> holeMap = new HashMap<>(contours.size());
 
-        for (int i=0; i < contours.size(); i++) {
-            holeOf.add(-1);
-        }
+        while (!sweepLine.eventQueue.isEmpty() && processedPolygons.size() < contours.size()) {
 
-        for (int i = 0; i<sweepEvents.size () && processedPolygons.size() < contours.size(); i++){
-            SweepEvent e = sweepEvents.get(i);
+            SweepEvent e = sweepLine.eventQueue.poll();
 
-            if (e.left) { // the segment must be inserted into S
-                SL.addEvent(e);
+            if (e.left) {
+                // the segment must be inserted into S
+                sweepLine.statusLine.addEvent(e);
 
                 if (!processedPolygons.contains(e.polygon)) {
                     processedPolygons.add(e.polygon);
 
-                    SweepEvent prev = SL.getPreviousEvent(e);
+                    SweepEvent prev = sweepLine.statusLine.getPreviousEvent(e);
 
                     if (prev == null) {
                         contour(e.polygon).setCounterClockwise();
                     } else {
-                        if (!prev.inOut){
-                            holeOf.set(e.polygon, prev.polygon);
-                            contour(e.polygon).setIsHole(true);
-                            contour(prev.polygon).addHole(e.polygon);
-                            if (contour(prev.polygon).counterClockwise()) {
-                                contour(e.polygon).setClockwise();
-                            } else {
-                                contour(e.polygon).setCounterClockwise();
-                            }
-                        } else if (holeOf.get(prev.polygon) !=-1){
-                            holeOf.set(e.polygon, holeOf.get(prev.polygon));
-                            contour(e.polygon).setIsHole(true);
-                            contour(holeOf.get(e.polygon)).addHole(e.polygon);
-                            if (contour(holeOf.get(e.polygon)).counterClockwise()) {
-                                contour(e.polygon).setClockwise();
-                            } else {
-                                contour(e.polygon).setCounterClockwise();
-                            }
-                        } else{
+                        if (!prev.inOut) {
+                            addHole(holeMap, e.polygon, prev.polygon);
+                        } else if (holeMap.containsKey(prev.polygon)) {
+                            addHole(holeMap, e.polygon, holeMap.get(prev.polygon));
+                        } else {
                             contour(e.polygon).setCounterClockwise();
                         }
                     }
                 }
             } else {
                 // the segment must be removed from S
-                SL.removeEvent(e.otherEvent);
+                sweepLine.statusLine.removeEvent(e.otherEvent);
             }
         }
-
-        System.out.println();
     }
 
-    private Iterator<SweepEvent> getDescendingIteratorToSegment(TreeSet<SweepEvent> SL, SweepEvent e) {
-        return SL.headSet(e, true).descendingIterator();
+    private void addHole(Map<Integer, Integer> holeMap, int holeContourIndex, int contourWithHoleIndex) {
+        holeMap.put(holeContourIndex, contourWithHoleIndex);
+        contour(holeContourIndex).setIsHole(true);
+        contour(contourWithHoleIndex).addHole(holeContourIndex);
+
+        if (contour(contourWithHoleIndex).counterClockwise()) {
+            contour(holeContourIndex).setClockwise();
+        } else {
+            contour(holeContourIndex).setCounterClockwise();
+        }
     }
 
     public void serialize(OutputStream outputStream) {

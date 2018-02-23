@@ -1,13 +1,10 @@
 package com.dwilden.polygonclipping.sweepline;
 
-import com.dwilden.polygonclipping.Point;
-import com.dwilden.polygonclipping.Segment;
+import com.dwilden.polygonclipping.geometry.Point;
+import com.dwilden.polygonclipping.geometry.Triangle;
+import com.dwilden.polygonclipping.segment.Segment;
 import com.dwilden.polygonclipping.enums.EdgeType;
 import com.dwilden.polygonclipping.enums.PolygonType;
-
-import java.util.Iterator;
-
-import static com.dwilden.polygonclipping.Utilities.signedArea;
 
 public class SweepEvent {
 
@@ -21,21 +18,18 @@ public class SweepEvent {
     /**  Does segment (point, otherEvent->p) represent an inside-outside transition in the polygon for a vertical ray from (p.x, -infinite)? */
     public boolean inOut;
     public boolean otherInOut; // inOut transition for the segment from the other polygon preceding this segment in sl
-    public Iterator<SweepEvent> posSL; // Position of the event (line segment) in sl
+
     public SweepEvent prevInResult; // previous segment in sl belonging to the result of the boolean operation
     public boolean inResult;
     public int pos;
     public boolean resultInOut;
     public int contourId;
 
-
-    public SweepEvent () {}
-
-    public SweepEvent (boolean left, Point point, SweepEvent otherEvent, PolygonType polygonType) {
-        this(left, point, otherEvent, polygonType, EdgeType.NORMAL);
+    public SweepEvent(Point point, boolean left, SweepEvent otherEvent, PolygonType polygonType) {
+        this(point, left, otherEvent, polygonType, EdgeType.NORMAL);
     }
 
-    public SweepEvent (boolean left, Point point, SweepEvent otherEvent, PolygonType polygonType, EdgeType edgeType) {
+    public SweepEvent(Point point, boolean left, SweepEvent otherEvent, PolygonType polygonType, EdgeType edgeType) {
         this.left = left;
         this.point = point;
         this.otherEvent = otherEvent;
@@ -48,7 +42,7 @@ public class SweepEvent {
         this.contourId = -1;
     }
 
-    public SweepEvent (Point point, boolean left, int polygon, boolean inOut) {
+    public SweepEvent(Point point, boolean left, int polygon, boolean inOut) {
         this.left = left;
         this.point = point;
         this.polygon = polygon;
@@ -58,8 +52,8 @@ public class SweepEvent {
     // member functions
     /** Is the line segment (point, otherEvent->point) below point p */
     public boolean below(Point p) {
-        return (left) ? signedArea(point, otherEvent.point, p) > 0 :
-                signedArea(otherEvent.point, point, p) > 0;
+        return (left) ? Triangle.signedArea(point, otherEvent.point, p) > 0 :
+                Triangle.signedArea(otherEvent.point, point, p) > 0;
     }
 
     /** Is the line segment (point, otherEvent->point) above point p */

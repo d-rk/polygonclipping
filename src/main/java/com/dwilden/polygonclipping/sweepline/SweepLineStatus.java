@@ -1,6 +1,6 @@
 package com.dwilden.polygonclipping.sweepline;
 
-import com.dwilden.polygonclipping.SegmentComp;
+import com.dwilden.polygonclipping.segment.SegmentComparator;
 
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -9,8 +9,8 @@ public class SweepLineStatus {
 
     private TreeSet<SweepEvent> SL;
 
-    public SweepLineStatus(boolean forHoleAlgorithm) {
-        this.SL = new TreeSet<>(new SegmentComp(forHoleAlgorithm));
+    public SweepLineStatus(SegmentComparator segmentComparator) {
+        this.SL = new TreeSet<>(segmentComparator);
     }
 
     public void addEvent(SweepEvent event) {

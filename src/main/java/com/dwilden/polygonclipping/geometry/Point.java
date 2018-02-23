@@ -1,4 +1,4 @@
-package com.dwilden.polygonclipping;
+package com.dwilden.polygonclipping.geometry;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -8,11 +8,12 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Point {
+
     public double x;
     public double y;
 
     /**
-     * Distance to other point
+     * Get distance to other point
      */
     public double dist(Point p) {
         double dx = x - p.x;

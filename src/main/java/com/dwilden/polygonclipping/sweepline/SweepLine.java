@@ -1,5 +1,7 @@
 package com.dwilden.polygonclipping.sweepline;
 
+import com.dwilden.polygonclipping.segment.SegmentComparator;
+
 import java.util.PriorityQueue;
 
 public class SweepLine {
@@ -9,8 +11,8 @@ public class SweepLine {
 
     public SweepLineStatus statusLine;
 
-    public SweepLine(boolean forHoleAlgorithm) {
-        this.eventQueue = new PriorityQueue<>(new SweepEventComp(true));
-        this.statusLine = new SweepLineStatus(forHoleAlgorithm);
+    public SweepLine(SegmentComparator segmentComparator) {
+        this.eventQueue = new PriorityQueue<>(new SweepEventComparator(true));
+        this.statusLine = new SweepLineStatus(segmentComparator);
     }
 }
