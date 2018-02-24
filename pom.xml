@@ -8,7 +8,7 @@
     <artifactId>polygon-clipping</artifactId>
     <version>1.0</version>
 
-    <name>polygonclipping</name>
+    <name>polygon-clipping</name>
     <description>library for polygon clipping</description>
     <url>https://github.com/random-dwi/polygonclipping</url>
     <licenses>
