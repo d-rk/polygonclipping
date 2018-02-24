@@ -18,13 +18,28 @@ public class Polygon {
 
     private List<Contour> contours = new ArrayList<>();
 
+    /**
+     * Instantiates an empty Polygon.
+     */
     public Polygon() {
     }
 
+    /**
+     * Instantiates a new Polygon.
+     *
+     * @param file file defining the polygon
+     * @throws IOException error reading input file
+     */
     public Polygon(File file) throws IOException {
         new Polygon(new FileInputStream(file));
     }
 
+    /**
+     * Instantiates a new Polygon.
+     *
+     * @param inputStream input stream defining the polygon
+     * @throws IOException error reading input stream
+     */
     public Polygon(InputStream inputStream) throws IOException {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -75,34 +90,69 @@ public class Polygon {
         inputStream.close();
     }
 
-    public Contour contour(int p) {
-        return contours.get(p);
+    /**
+     * Get contour by index.
+     *
+     * @param index the index
+     * @return the contour
+     */
+    public Contour contour(int index) {
+        return contours.get(index);
     }
 
+    /**
+     * Returns the number of contours in the polygon.
+     *
+     * @return number of contours
+     */
     public int contourCount() {
         return contours.size();
     }
 
+    /**
+     * Returns whether the polygon is empty.
+     *
+     * @return no contours in polygon
+     */
     public boolean isEmpty() {
         return contours.isEmpty();
     }
 
+    /**
+     * Get number of points in polygon.
+     *
+     * @return point count
+     */
     public int pointCount() {
         return contours.stream().mapToInt(Contour::pointCount).sum();
     }
 
+    /**
+     * Get boundingBox of the polygon.
+     *
+     * @return the bounding box
+     */
     public BoundingBox boundingBox() {
         BoundingBox boundingBox = new BoundingBox();
-        contours.forEach(c -> boundingBox.union(c.boundingBox()));
+        contours.forEach(c -> boundingBox.combine(c.boundingBox()));
         return boundingBox;
     }
 
-    public void move(double x, double y) {
-        for (Contour contour : contours) {
-            contour.move(x, y);
-        }
+    /**
+     * Move the polygon.
+     *
+     * @param dx distance in x direction
+     * @param dy distance in y direction
+     */
+    public void move(double dx, double dy) {
+        contours.forEach(c -> c.move(dx, dy));
     }
 
+    /**
+     * Join current polygon with the given polygon.
+     *
+     * @param polygon the polygon to join with
+     */
     public void join(Polygon polygon) {
 
         Polygon polygonCopy = polygon.copy();
@@ -115,32 +165,61 @@ public class Polygon {
         }
     }
 
+    /**
+     * Create a copy of this polygon.
+     *
+     * @return polygon copy
+     */
     public Polygon copy() {
         Polygon copy = new Polygon();
         copy.contours = contours.stream().map(Contour::copy).collect(Collectors.toList());
         return copy;
     }
 
+    /**
+     * Add contour to polygon.
+     *
+     * @param contour the contour
+     */
     public void addContour(Contour contour) {
         contours.add(contour);
     }
 
+    /**
+     * Get last contour of polygon.
+     *
+     * @return the contour
+     */
     public Contour lastContour() {
         return contours.get(contours.size() - 1);
     }
 
+    /**
+     * Remove last contour.
+     */
     public void removeLastContour() {
         contours.remove(contours.size() - 1);
     }
 
-    public void removeContour(int i) {
-        contours.remove(i);
+    /**
+     * Remove contour by index
+     *
+     * @param index the index
+     */
+    public void removeContour(int index) {
+        contours.remove(index);
     }
 
+    /**
+     * Clear contours of polygon.
+     */
     public void clear() {
         contours.clear();
     }
 
+    /**
+     * Compute which of the contours are holes in other contours.
+     */
     public void computeHoles() {
 
         contours.forEach(c -> c.getHoles().clear());
@@ -228,6 +307,11 @@ public class Polygon {
         }
     }
 
+    /**
+     * Serialize the polygon.
+     *
+     * @param outputStream output to serialize to.
+     */
     public void serialize(OutputStream outputStream) {
         try (PrintWriter writer = new PrintWriter(outputStream)) {
             // write contours

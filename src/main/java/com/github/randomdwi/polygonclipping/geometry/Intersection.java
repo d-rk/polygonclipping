@@ -21,6 +21,12 @@ public class Intersection {
     public Type type;
 
 
+    /**
+     * Determine intersection between two segments.
+     *
+     * @param segmentA the segment a
+     * @param segmentB the segment b
+     */
     public Intersection(Segment segmentA, Segment segmentB) {
 
         Point p0 = segmentA.pBegin;

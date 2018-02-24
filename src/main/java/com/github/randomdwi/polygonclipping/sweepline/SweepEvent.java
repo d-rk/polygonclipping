@@ -15,7 +15,9 @@ public class SweepEvent {
     public int polygon;
     public EdgeType type;
     //The following fields are only used in "left" events
-    /**  Does segment (point, otherEvent->p) represent an inside-outside transition in the polygon for a vertical ray from (p.x, -infinite)? */
+    /**
+     * Does segment (point, otherEvent.p) represent an inside-outside transition in the polygon for a vertical ray from (p.x, -infinite)?
+     */
     public boolean inOut;
     public boolean otherInOut; // inOut transition for the segment from the other polygon preceding this segment in sl
 
@@ -25,10 +27,27 @@ public class SweepEvent {
     public boolean resultInOut;
     public int contourId;
 
+    /**
+     * Instantiates a new Sweep event.
+     *
+     * @param point       the point
+     * @param left        the left
+     * @param otherEvent  the other event
+     * @param polygonType the polygon type
+     */
     public SweepEvent(Point point, boolean left, SweepEvent otherEvent, PolygonType polygonType) {
         this(point, left, otherEvent, polygonType, EdgeType.NORMAL);
     }
 
+    /**
+     * Instantiates a new Sweep event.
+     *
+     * @param point       the point
+     * @param left        the left
+     * @param otherEvent  the other event
+     * @param polygonType the polygon type
+     * @param edgeType    the edge type
+     */
     public SweepEvent(Point point, boolean left, SweepEvent otherEvent, PolygonType polygonType, EdgeType edgeType) {
         this.left = left;
         this.point = point;
@@ -42,6 +61,14 @@ public class SweepEvent {
         this.contourId = -1;
     }
 
+    /**
+     * Instantiates a new Sweep event.
+     *
+     * @param point   the point
+     * @param left    the left
+     * @param polygon the polygon
+     * @param inOut   the in out
+     */
     public SweepEvent(Point point, boolean left, int polygon, boolean inOut) {
         this.left = left;
         this.point = point;
@@ -49,24 +76,39 @@ public class SweepEvent {
         this.inOut = inOut;
     }
 
-    // member functions
-    /** Is the line segment (point, otherEvent->point) below point p */
+    /**
+     * Is the line segment (point, otherEvent.point) below point p
+     * @param p other point
+     *
+     * @return is point below?
+     */
     public boolean below(Point p) {
         return (left) ? Triangle.signedArea(point, otherEvent.point, p) > 0 :
                 Triangle.signedArea(otherEvent.point, point, p) > 0;
     }
 
-    /** Is the line segment (point, otherEvent->point) above point p */
+    /**
+     * Is the line segment (point, otherEvent.point) above point p
+     * @param p other point
+     *
+     * @return is point above?
+     */
     public boolean above(Point p) {
         return !below(p);
     }
 
-    /** Is the line segment (point, otherEvent->point) a vertical line segment */
+    /**
+     * Is the line segment (point, otherEvent.point) a vertical line segment
+     * @return is line segment vertical
+     */
     public boolean vertical() {
         return point.x == otherEvent.point.x;
     }
 
-    /** Return the line segment associated to the SweepEvent */
+    /**
+     * Return the line segment associated to the SweepEvent
+     * @return the segment
+     */
     public Segment segment() {
         return new Segment(point, otherEvent.point);
     }

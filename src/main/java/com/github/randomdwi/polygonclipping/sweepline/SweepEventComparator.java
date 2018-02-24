@@ -8,6 +8,11 @@ public class SweepEventComparator implements Comparator<SweepEvent> {
 
     private final boolean reverse;
 
+    /**
+     * Instantiates a new Sweep event comparator.
+     *
+     * @param reverse the reverse
+     */
     public SweepEventComparator(boolean reverse) {
         this.reverse = reverse;
     }
