@@ -19,7 +19,10 @@ import static com.github.randomdwi.polygonclipping.BooleanOperation.Type.*;
 public class BooleanOperation {
 
     public enum Type {
-        INTERSECTION, UNION, DIFFERENCE, XOR
+        INTERSECTION,
+        UNION,
+        DIFFERENCE,
+        XOR
     }
 
     private Polygon subject;
@@ -31,6 +34,13 @@ public class BooleanOperation {
     private SweepLine sweepLine = new SweepLine(new SegmentComparator(false));
     private Deque<SweepEvent> sortedEvents = new LinkedList<>();
 
+    /**
+     * Instantiates a new Boolean operation.
+     *
+     * @param subject   the subject polygon
+     * @param clip      the clipping polygon
+     * @param operation the operation
+     */
     BooleanOperation(Polygon subject, Polygon clip, BooleanOperation.Type operation) {
         this.subject = subject.copy();
         this.clipping = clip.copy();
@@ -38,6 +48,11 @@ public class BooleanOperation {
         this.result = new Polygon();
     }
 
+    /**
+     * Execute boolean operation.
+     *
+     * @return result polygon
+     */
     public Polygon execute() {
 
         BoundingBox subjectBB = subject.boundingBox();     // for optimizations 1 and 2
@@ -142,7 +157,7 @@ public class BooleanOperation {
     }
 
     /**
-     * @brief Compute the events associated to segment s, and insert them into pq and eq
+     * Compute the events associated to segment s, and insert them into pq and eq
      */
     private void processSegment(Segment s, PolygonType pt) {
 //        // if the two edge endpoints are equal the segment is dicarded
@@ -164,7 +179,7 @@ public class BooleanOperation {
     }
 
     /**
-     * @brief Process a posible intersection between the edges associated to the left events le1 and le2
+     * Process a possible intersection between the edges associated to the left events le1 and le2
      */
     private int possibleIntersection(SweepEvent le1, SweepEvent le2) {
 
@@ -250,7 +265,7 @@ public class BooleanOperation {
     }
 
     /**
-     * @brief Divide the segment associated to left event le, updating pq and (implicitly) the status line
+     * Divide the segment associated to left event le, updating pq and (implicitly) the status line
      */
     private void divideSegment(SweepEvent le, Point p) {
 
@@ -269,7 +284,7 @@ public class BooleanOperation {
     }
 
     /**
-     * @brief return if the left event le belongs to the result of the booleanean operation
+     * return if the left event le belongs to the result of the boolean operation
      */
     private boolean inResult(SweepEvent le) {
         switch (le.type) {
@@ -295,7 +310,7 @@ public class BooleanOperation {
     }
 
     /**
-     * @brief compute several fields of left event le
+     * compute several fields of left event le
      */
     private void computeFields(SweepEvent le, SweepEvent prev) {
         // compute inOut and otherInOut fields

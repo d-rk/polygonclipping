@@ -6,8 +6,14 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * The type Segment comparator test.
+ */
 public class SegmentComparatorTest {
 
+    /**
+     * Test equality.
+     */
     @Test
     public void testEquality() {
 

@@ -9,8 +9,13 @@ import java.util.Comparator;
 
 public class SegmentComparator implements Comparator<SweepEvent> {
 
-    boolean forHoleAlgorithm;
+    private boolean forHoleAlgorithm;
 
+    /**
+     * Instantiates a new Segment comparator.
+     *
+     * @param forHoleAlgorithm for hole algorithm
+     */
     public SegmentComparator(boolean forHoleAlgorithm) {
         this.forHoleAlgorithm = forHoleAlgorithm;
     }

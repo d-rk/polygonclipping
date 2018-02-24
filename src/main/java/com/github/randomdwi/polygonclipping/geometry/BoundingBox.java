@@ -15,7 +15,12 @@ public class BoundingBox {
     public double xMax;
     public double yMax;
 
-    public void union(BoundingBox other) {
+    /**
+     * Combine bounding box with other bounding box.
+     *
+     * @param other other bounding box
+     */
+    public void combine(BoundingBox other) {
         xMin = Math.min(xMin, other.xMin);
         yMin = Math.min(yMin, other.yMin);
         xMax = Math.max(xMax, other.xMax);
