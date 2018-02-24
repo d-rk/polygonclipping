@@ -1,6 +1,6 @@
-package com.dwilden.polygonclipping.geometry;
+package com.github.randomdwi.polygonclipping.geometry;
 
-import com.dwilden.polygonclipping.segment.Segment;
+import com.github.randomdwi.polygonclipping.segment.Segment;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

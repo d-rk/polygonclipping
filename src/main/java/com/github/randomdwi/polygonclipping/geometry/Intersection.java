@@ -1,9 +1,9 @@
-package com.dwilden.polygonclipping.geometry;
+package com.github.randomdwi.polygonclipping.geometry;
 
-import com.dwilden.polygonclipping.segment.Segment;
+import com.github.randomdwi.polygonclipping.segment.Segment;
 import lombok.Data;
 
-import static com.dwilden.polygonclipping.geometry.Intersection.Type.*;
+import static com.github.randomdwi.polygonclipping.geometry.Intersection.Type.*;
 
 @Data
 public class Intersection {

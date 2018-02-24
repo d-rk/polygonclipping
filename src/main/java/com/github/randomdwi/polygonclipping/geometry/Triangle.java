@@ -1,4 +1,4 @@
-package com.dwilden.polygonclipping.geometry;
+package com.github.randomdwi.polygonclipping.geometry;
 
 public class Triangle {
 

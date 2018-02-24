@@ -1,4 +1,4 @@
-package com.dwilden.polygonclipping.utils;
+package com.github.randomdwi.polygonclipping.utils;
 
 import java.util.Arrays;
 import java.util.List;

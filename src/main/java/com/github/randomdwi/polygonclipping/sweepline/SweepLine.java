@@ -1,6 +1,6 @@
-package com.dwilden.polygonclipping.sweepline;
+package com.github.randomdwi.polygonclipping.sweepline;
 
-import com.dwilden.polygonclipping.segment.SegmentComparator;
+import com.github.randomdwi.polygonclipping.segment.SegmentComparator;
 
 import java.util.PriorityQueue;
 

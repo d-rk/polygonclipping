@@ -1,6 +1,6 @@
-package com.dwilden.polygonclipping.segment;
+package com.github.randomdwi.polygonclipping.segment;
 
-import com.dwilden.polygonclipping.geometry.Point;
+import com.github.randomdwi.polygonclipping.geometry.Point;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode

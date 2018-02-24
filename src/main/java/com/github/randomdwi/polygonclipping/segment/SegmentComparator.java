@@ -1,9 +1,9 @@
-package com.dwilden.polygonclipping.segment;
+package com.github.randomdwi.polygonclipping.segment;
 
-import com.dwilden.polygonclipping.geometry.Triangle;
-import com.dwilden.polygonclipping.enums.PolygonType;
-import com.dwilden.polygonclipping.sweepline.SweepEvent;
-import com.dwilden.polygonclipping.sweepline.SweepEventComparator;
+import com.github.randomdwi.polygonclipping.geometry.Triangle;
+import com.github.randomdwi.polygonclipping.enums.PolygonType;
+import com.github.randomdwi.polygonclipping.sweepline.SweepEvent;
+import com.github.randomdwi.polygonclipping.sweepline.SweepEventComparator;
 
 import java.util.Comparator;
 

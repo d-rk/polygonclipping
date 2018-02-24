@@ -1,6 +1,6 @@
-package com.dwilden.polygonclipping;
+package com.github.randomdwi.polygonclipping;
 
-import com.dwilden.polygonclipping.geometry.Contour;
+import com.github.randomdwi.polygonclipping.geometry.Contour;
 import org.assertj.core.data.Offset;
 import org.junit.Test;
 

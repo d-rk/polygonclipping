@@ -1,7 +1,7 @@
-package com.dwilden.polygonclipping.segment;
+package com.github.randomdwi.polygonclipping.segment;
 
-import com.dwilden.polygonclipping.geometry.Point;
-import com.dwilden.polygonclipping.sweepline.SweepEvent;
+import com.github.randomdwi.polygonclipping.geometry.Point;
+import com.github.randomdwi.polygonclipping.sweepline.SweepEvent;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

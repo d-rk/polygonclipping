@@ -1,20 +1,20 @@
-package com.dwilden.polygonclipping;
+package com.github.randomdwi.polygonclipping;
 
-import com.dwilden.polygonclipping.enums.EdgeType;
-import com.dwilden.polygonclipping.enums.PolygonType;
-import com.dwilden.polygonclipping.geometry.BoundingBox;
-import com.dwilden.polygonclipping.geometry.Contour;
-import com.dwilden.polygonclipping.geometry.Intersection;
-import com.dwilden.polygonclipping.geometry.Point;
-import com.dwilden.polygonclipping.segment.Segment;
-import com.dwilden.polygonclipping.segment.SegmentComparator;
-import com.dwilden.polygonclipping.sweepline.SweepEvent;
-import com.dwilden.polygonclipping.sweepline.SweepEventComparator;
-import com.dwilden.polygonclipping.sweepline.SweepLine;
+import com.github.randomdwi.polygonclipping.enums.EdgeType;
+import com.github.randomdwi.polygonclipping.enums.PolygonType;
+import com.github.randomdwi.polygonclipping.geometry.BoundingBox;
+import com.github.randomdwi.polygonclipping.geometry.Contour;
+import com.github.randomdwi.polygonclipping.geometry.Intersection;
+import com.github.randomdwi.polygonclipping.geometry.Point;
+import com.github.randomdwi.polygonclipping.segment.Segment;
+import com.github.randomdwi.polygonclipping.segment.SegmentComparator;
+import com.github.randomdwi.polygonclipping.sweepline.SweepEvent;
+import com.github.randomdwi.polygonclipping.sweepline.SweepEventComparator;
+import com.github.randomdwi.polygonclipping.sweepline.SweepLine;
 
 import java.util.*;
 
-import static com.dwilden.polygonclipping.BooleanOperation.Type.*;
+import static com.github.randomdwi.polygonclipping.BooleanOperation.Type.*;
 
 public class BooleanOperation {
 

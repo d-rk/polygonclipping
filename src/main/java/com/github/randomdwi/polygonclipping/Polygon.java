@@ -1,14 +1,14 @@
-package com.dwilden.polygonclipping;
+package com.github.randomdwi.polygonclipping;
 
 
-import com.dwilden.polygonclipping.geometry.BoundingBox;
-import com.dwilden.polygonclipping.geometry.Contour;
-import com.dwilden.polygonclipping.geometry.Point;
-import com.dwilden.polygonclipping.segment.Segment;
-import com.dwilden.polygonclipping.segment.SegmentComparator;
-import com.dwilden.polygonclipping.sweepline.SweepEvent;
-import com.dwilden.polygonclipping.sweepline.SweepLine;
-import com.dwilden.polygonclipping.utils.ReaderUtil;
+import com.github.randomdwi.polygonclipping.geometry.BoundingBox;
+import com.github.randomdwi.polygonclipping.geometry.Contour;
+import com.github.randomdwi.polygonclipping.geometry.Point;
+import com.github.randomdwi.polygonclipping.segment.Segment;
+import com.github.randomdwi.polygonclipping.segment.SegmentComparator;
+import com.github.randomdwi.polygonclipping.sweepline.SweepEvent;
+import com.github.randomdwi.polygonclipping.sweepline.SweepLine;
+import com.github.randomdwi.polygonclipping.utils.ReaderUtil;
 
 import java.io.*;
 import java.util.*;

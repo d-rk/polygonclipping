@@ -1,6 +1,6 @@
-package com.dwilden.polygonclipping.sweepline;
+package com.github.randomdwi.polygonclipping.sweepline;
 
-import com.dwilden.polygonclipping.geometry.Triangle;
+import com.github.randomdwi.polygonclipping.geometry.Triangle;
 
 import java.util.Comparator;
 

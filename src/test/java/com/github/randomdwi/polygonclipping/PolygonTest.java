@@ -1,5 +1,6 @@
-package com.dwilden.polygonclipping;
+package com.github.randomdwi.polygonclipping;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,8 +19,8 @@ public class PolygonTest {
         p.computeHoles();
 
         assertThat(p.contourCount()).isEqualTo(3);
-        assertThat(p.contour(0).getHoles()).containsExactly(1);
-        assertThat(p.contour(1).getHoles()).containsExactly(2);
-        assertThat(p.contour(2).getHoles()).isEmpty();
+        Assertions.assertThat(p.contour(0).getHoles()).containsExactly(1);
+        Assertions.assertThat(p.contour(1).getHoles()).containsExactly(2);
+        Assertions.assertThat(p.contour(2).getHoles()).isEmpty();
     }
 }

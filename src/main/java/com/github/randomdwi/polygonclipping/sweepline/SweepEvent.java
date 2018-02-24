@@ -1,10 +1,10 @@
-package com.dwilden.polygonclipping.sweepline;
+package com.github.randomdwi.polygonclipping.sweepline;
 
-import com.dwilden.polygonclipping.geometry.Point;
-import com.dwilden.polygonclipping.geometry.Triangle;
-import com.dwilden.polygonclipping.segment.Segment;
-import com.dwilden.polygonclipping.enums.EdgeType;
-import com.dwilden.polygonclipping.enums.PolygonType;
+import com.github.randomdwi.polygonclipping.geometry.Point;
+import com.github.randomdwi.polygonclipping.geometry.Triangle;
+import com.github.randomdwi.polygonclipping.segment.Segment;
+import com.github.randomdwi.polygonclipping.enums.EdgeType;
+import com.github.randomdwi.polygonclipping.enums.PolygonType;
 
 public class SweepEvent {
 
