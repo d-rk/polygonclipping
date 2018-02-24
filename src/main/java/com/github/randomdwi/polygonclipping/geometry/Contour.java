@@ -21,7 +21,7 @@ public class Contour {
     private List<Integer> holes = new ArrayList<>();
 
     // is this contour a hole? (i.e. not an external contour)
-    private boolean isHole = true;
+    private boolean isHole = false;
 
     // is contour counterClockwise? (lazily initialized)
     private Boolean isCounterClockwise;
@@ -169,6 +169,14 @@ public class Contour {
      */
     public void clearHoles() {
         holes.clear();
+    }
+
+    /**
+     * Get all points of the contour.
+     * @return list of points
+     */
+    public List<Point> getPoints() {
+        return points;
     }
 
     /**

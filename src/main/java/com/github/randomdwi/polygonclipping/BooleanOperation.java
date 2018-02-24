@@ -41,7 +41,7 @@ public class BooleanOperation {
      * @param clip      the clipping polygon
      * @param operation the operation
      */
-    BooleanOperation(Polygon subject, Polygon clip, BooleanOperation.Type operation) {
+    public BooleanOperation(Polygon subject, Polygon clip, BooleanOperation.Type operation) {
         this.subject = subject.copy();
         this.clipping = clip.copy();
         this.operation = operation;

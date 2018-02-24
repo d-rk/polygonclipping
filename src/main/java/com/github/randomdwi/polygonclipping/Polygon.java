@@ -177,6 +177,14 @@ public class Polygon {
     }
 
     /**
+     * Get a list of all contours
+     * @return contours
+     */
+    public List<Contour> getContours() {
+        return contours;
+    }
+
+    /**
      * Add contour to polygon.
      *
      * @param contour the contour
