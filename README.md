@@ -43,15 +43,16 @@ Polygon result4 = BooleanOperation.XOR(subject, clipping);
 ### Create polygons
 
 #### Simple polygon
+##### Code
 ```java
 double[][] points = {{2.5,7.5}, {5.0, 5.0}, {7.5, 7.5}, {5.0, 10.0}};
 Polygon p = Polygon.from(points);
 ```
-|            |              |
-| ---------- | ------------ |
-|**Result:**   | ![Simple Polygon](images/create_polygon.png)|
+##### Result
+![Simple Polygon](images/create_polygon.png)
         
 #### Polygon with holes
+##### Code
 ```java
 double[][] outerContour = {{0.0,0.0}, {10.0, 0.0}, {10.0, 10.0}, {0.0, 10.0}};
 double[][] hole1 = {{0.5,0.5}, {4.0, 0.5}, {2.0, 4.0}};
@@ -59,7 +60,6 @@ double[][] hole2 = {{2.5,7.5}, {5.0, 5.0}, {7.5, 7.5}, {5.0, 10.0}};
 
 Polygon p = Polygon.from(Contour.from(outerContour), Contour.from(hole1), Contour.from(hole2));
 ```
-|            |              |
-| ---------- | ------------ |
-|**Result:**   | ![Polygon with holes](images/create_polygon_with_holes.png)|
+##### Result
+![Polygon with holes](images/create_polygon_with_holes.png)
 
