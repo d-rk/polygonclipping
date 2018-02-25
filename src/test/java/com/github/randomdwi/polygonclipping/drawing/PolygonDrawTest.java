@@ -43,7 +43,7 @@ public class PolygonDrawTest {
         Polygon subj = new Polygon(BooleanOperationTest.class.getResourceAsStream("/polygons/samples/rectangle1"));
         Polygon clip = new Polygon(BooleanOperationTest.class.getResourceAsStream("/polygons/samples/triangle2"));
 
-        Polygon result = new BooleanOperation(subj, clip, BooleanOperation.Type.XOR).execute();
+        Polygon result = BooleanOperation.XOR(subj, clip);
 
         BoundingBox bb = new BoundingBox().combine(subj.boundingBox()).combine(clip.boundingBox()).combine(result.boundingBox());
 

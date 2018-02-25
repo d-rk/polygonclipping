@@ -25,6 +25,14 @@ public class Polygon {
     }
 
     /**
+     * Instantiates an empty Polygon.
+     */
+    public Polygon(List<Contour> contours) {
+        this.contours = contours;
+        computeHoles();
+    }
+
+    /**
      * Instantiates a new Polygon.
      *
      * @param file file defining the polygon
@@ -178,6 +186,7 @@ public class Polygon {
 
     /**
      * Get a list of all contours
+     *
      * @return contours
      */
     public List<Contour> getContours() {
@@ -336,5 +345,28 @@ public class Polygon {
                 }
             }
         }
+    }
+
+    /**
+     * Create polygon from given contours.
+     * Contours can be external or holes inside of other contours.
+     *
+     * @param contours contours
+     * @return polygon
+     */
+    public static Polygon from(Contour... contours) {
+        List<Contour> contourList = Arrays.stream(contours).collect(Collectors.toList());
+        return new Polygon(contourList);
+    }
+
+    /**
+     * Create polygon from points.
+     * Polygon will contain one contour with the given points.
+     *
+     * @param points points
+     * @return polygon
+     */
+    public static Polygon from(double[][] points) {
+        return Polygon.from(Contour.from(points));
     }
 }

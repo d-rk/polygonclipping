@@ -4,6 +4,7 @@ import com.github.randomdwi.polygonclipping.segment.Segment;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,21 @@ public class Contour {
 
     // is contour counterClockwise? (lazily initialized)
     private Boolean isCounterClockwise;
+
+    /**
+     * Create an empty contour
+     */
+    public Contour() {
+    }
+
+    /**
+     * Create contour from given points.
+     *
+     * @param points points
+     */
+    public Contour(List<Point> points) {
+        this.points = points;
+    }
 
     /**
      * Get bounding box of contour.
@@ -173,6 +189,7 @@ public class Contour {
 
     /**
      * Get all points of the contour.
+     *
      * @return list of points
      */
     public List<Point> getPoints() {
@@ -284,5 +301,18 @@ public class Contour {
         copy.isHole = isHole;
         copy.isCounterClockwise = isCounterClockwise;
         return copy;
+    }
+
+    /**
+     * Create contour from given points.
+     *
+     * @param points points
+     * @return contour spanned by points
+     */
+    public static Contour from(double[][] points) {
+        List<Point> pointList = Arrays.stream(points)
+                .map(coord -> new Point(coord[0], coord[1]))
+                .collect(Collectors.toList());
+        return new Contour(pointList);
     }
 }

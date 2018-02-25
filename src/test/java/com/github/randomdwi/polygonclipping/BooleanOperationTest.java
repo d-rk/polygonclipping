@@ -19,7 +19,7 @@ public class BooleanOperationTest {
         Polygon subj = new Polygon(BooleanOperationTest.class.getResourceAsStream("/polygons/samples/rectangle1"));
         Polygon clip = new Polygon(BooleanOperationTest.class.getResourceAsStream("/polygons/samples/triangle2"));
 
-        Polygon result = new BooleanOperation(subj, clip, BooleanOperation.Type.INTERSECTION).execute();
+        Polygon result = BooleanOperation.INTERSECTION(subj, clip);
 
         assertThat(result).isNotNull();
         assertThat(result.contourCount()).isEqualTo(1);
