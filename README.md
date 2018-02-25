@@ -23,16 +23,19 @@ Polygon
 
 ## Examples
 
+### Apply boolean operation
+
 ```java
 Polygon subject = new Polygon(new File("/polygons/samples/rectangle1"));
 Polygon clipping = new Polygon(new File("/polygons/samples/triangle2"));
 
-Polygon result1 = BooleanOperation.INTERSECTION.of(subject, clipping);
-Polygon result2 = BooleanOperation.DIFFERENCE.of(subject, clipping);
-Polygon result3 = BooleanOperation.UNION.of(subject, clipping);
-Polygon result4 = BooleanOperation.XOR.of(subject, clipping);
+Polygon result1 = new BooleanOperation(subject, clipping, INTERSECTION).execute();
+Polygon result2 = new BooleanOperation(subject, clipping, DIFFERENCE).execute();
+Polygon result3 = new BooleanOperation(subject, clipping, UNION).execute();
+Polygon result4 = new BooleanOperation(subject, clipping, XOR).execute();
 ```
 
 | ORIGINAL   | INTERSECTION | DIFFERENCE | UNION      | XOR          |
 | ---------- | ------------ | ---------- | ---------- | ------------ |
 | ![Sample1](images/sample_1.png) |![Sample1](images/sample_1_intersection.png)| ![Sample1](images/sample_1_difference.png) |![Sample1](images/sample_1_union.png)| ![Sample1](images/sample_1_xor.png) |
+
