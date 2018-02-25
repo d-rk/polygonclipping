@@ -18,7 +18,7 @@ import static com.github.randomdwi.polygonclipping.BooleanOperation.Type.*;
 
 public class BooleanOperation {
 
-    public enum Type {
+    enum Type {
         INTERSECTION,
         UNION,
         DIFFERENCE,
@@ -35,25 +35,57 @@ public class BooleanOperation {
     private Deque<SweepEvent> sortedEvents = new LinkedList<>();
 
     /**
-     * Instantiates a new Boolean operation.
+     * Compute the intersection of subject with clipping polygon.
      *
-     * @param subject   the subject polygon
-     * @param clip      the clipping polygon
-     * @param operation the operation
+     * @param subject subject polygon
+     * @param clipping clipping polygon
+     * @return result of the operation
      */
-    BooleanOperation(Polygon subject, Polygon clip, BooleanOperation.Type operation) {
+    public static Polygon INTERSECTION(Polygon subject, Polygon clipping) {
+        return new BooleanOperation(subject, clipping, INTERSECTION).execute();
+    }
+
+    /**
+     * Compute the union of subject with clipping polygon.
+     *
+     * @param subject subject polygon
+     * @param clipping clipping polygon
+     * @return result of the operation
+     */
+    public static Polygon UNION(Polygon subject, Polygon clipping) {
+        return new BooleanOperation(subject, clipping, UNION).execute();
+    }
+
+    /**
+     * Compute the difference of subject with clipping polygon.
+     *
+     * @param subject subject polygon
+     * @param clipping clipping polygon
+     * @return result of the operation
+     */
+    public static Polygon DIFFERENCE(Polygon subject, Polygon clipping) {
+        return new BooleanOperation(subject, clipping, DIFFERENCE).execute();
+    }
+
+    /**
+     * Compute exclusive or of subject with clipping polygon.
+     *
+     * @param subject subject polygon
+     * @param clipping clipping polygon
+     * @return result of the operation
+     */
+    public static Polygon XOR(Polygon subject, Polygon clipping) {
+        return new BooleanOperation(subject, clipping, XOR).execute();
+    }
+
+    private BooleanOperation(Polygon subject, Polygon clip, BooleanOperation.Type operation) {
         this.subject = subject.copy();
         this.clipping = clip.copy();
         this.operation = operation;
         this.result = new Polygon();
     }
 
-    /**
-     * Execute boolean operation.
-     *
-     * @return result polygon
-     */
-    public Polygon execute() {
+    private Polygon execute() {
 
         BoundingBox subjectBB = subject.boundingBox();     // for optimizations 1 and 2
         BoundingBox clippingBB = clipping.boundingBox();   // for optimizations 1 and 2
