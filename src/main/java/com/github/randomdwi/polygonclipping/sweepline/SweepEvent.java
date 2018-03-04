@@ -119,6 +119,7 @@ public class SweepEvent {
                 "left=" + left +
                 ", inOut=" + inOut +
                 ", point=" + point +
+                ", otherPoint=" + (otherEvent != null ? otherEvent.point : null) +
                 ", polygon=" + polygon +
                 '}';
     }

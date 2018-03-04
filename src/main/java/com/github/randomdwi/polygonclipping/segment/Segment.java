@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 public class Segment {
 
+    private static final Point ORIGIN = new Point(0.0, 0.0);
+
     public Point pBegin;
     public Point pEnd;
 
@@ -63,5 +65,29 @@ public class Segment {
      */
     public boolean isVertical() {
         return pBegin.x == pEnd.x;
+    }
+
+    /**
+     * Get normal of segment pointing inwards.
+     * @return inwards normal
+     */
+    public Point getInwardsNormal() {
+
+        Point edge = pEnd.minus(pBegin);
+        double edgeLength = edge.dist(ORIGIN);
+
+        if (edgeLength == 0.0) {
+            throw new IllegalStateException("degenerated segment");
+        }
+
+        return new Point(-edge.y / edgeLength, edge.x / edgeLength);
+    }
+
+    /**
+     * Get normal of segment pointing outwards.
+     * @return outwards normal
+     */
+    public Point getOutwardsNormal() {
+        return getInwardsNormal().multiply(-1.0);
     }
 }

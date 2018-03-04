@@ -228,7 +228,7 @@ public class BooleanOperation {
             return 0;
         }
 
-        if ((Intersection.Type.POINT.equals(intersections.type)) && ((le1.point.equals(le2.point)) || (le1.otherEvent.point.equals(le2.otherEvent.point)))) {
+        if ((Intersection.Type.POINT.equals(intersections.type)) && ((le1.point.isCloseTo(le2.point)) || (le1.otherEvent.point.isCloseTo(le2.otherEvent.point)))) {
             // the line segments intersect at an endpoint of both line segments
             return 0;
         }
@@ -239,11 +239,11 @@ public class BooleanOperation {
 
         // The line segments associated to le1 and le2 intersect
         if (Intersection.Type.POINT.equals(intersections.type)) {
-            if (!le1.point.equals(intersections.point) && !le1.otherEvent.point.equals(intersections.point)) {
+            if (!le1.point.isCloseTo(intersections.point) && !le1.otherEvent.point.isCloseTo(intersections.point)) {
                 // if the intersection point is not an endpoint of le1.segment ()
                 divideSegment(le1, intersections.point);
             }
-            if (!le2.point.equals(intersections.point) && !le2.otherEvent.point.equals(intersections.point)) {
+            if (!le2.point.isCloseTo(intersections.point) && !le2.otherEvent.point.isCloseTo(intersections.point)) {
                 // if the intersection point is not an endpoint of le2.segment ()
                 divideSegment(le2, intersections.point);
             }
@@ -252,7 +252,7 @@ public class BooleanOperation {
         // The line segments associated to le1 and le2 overlap
         List<SweepEvent> sortedEvents = new ArrayList<>();
 
-        if (le1.point.equals(le2.point)) {
+        if (le1.point.isCloseTo(le2.point)) {
             sortedEvents.add(null);
         } else if (sweepEventComparator.compare(le1, le2) < 0) {
             sortedEvents.add(le2);
@@ -261,7 +261,7 @@ public class BooleanOperation {
             sortedEvents.add(le1);
             sortedEvents.add(le2);
         }
-        if (le1.otherEvent.point.equals(le2.otherEvent.point)) {
+        if (le1.otherEvent.point.isCloseTo(le2.otherEvent.point)) {
             sortedEvents.add(null);
         } else if (sweepEventComparator.compare(le1.otherEvent, le2.otherEvent) < 0) {
             sortedEvents.add(le2.otherEvent);
@@ -484,6 +484,11 @@ public class BooleanOperation {
         while (processed.contains(newPos)) {
             --newPos;
         }
+
+        if (newPos == -1) {
+            throw new IllegalStateException("cannot determine next position");
+        }
+
         return newPos;
     }
 }

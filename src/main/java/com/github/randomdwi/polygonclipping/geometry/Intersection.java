@@ -110,10 +110,10 @@ public class Intersection {
     }
 
     private void snapPointToSegment(Segment segment) {
-        if (point.dist(segment.pBegin) < EPSILON) {
+        if (point.isCloseTo(segment.pBegin)) {
             point = segment.pBegin;
         }
-        if (point.dist(segment.pEnd) < EPSILON) {
+        if (point.isCloseTo(segment.pEnd)) {
             point = segment.pEnd;
         }
     }

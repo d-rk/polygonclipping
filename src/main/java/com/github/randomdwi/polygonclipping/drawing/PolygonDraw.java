@@ -70,7 +70,9 @@ public class PolygonDraw {
 
         contours.forEach(c -> {
             if (!drawnContours.contains(c)) {
-                drawContourWithHoles(polygon, c, color, drawnContours, true);
+                drawContourWithHoles(polygon, c, color, drawnContours);
+            } else {
+                drawShape(contourToAwtPolygon(c), color, false);
             }
         });
     }
@@ -123,13 +125,15 @@ public class PolygonDraw {
         graphics.drawLine(mapXToImage(0.0), 0, mapXToImage(0.0), height);
     }
 
-    private void drawShape(Shape shape, Color color) {
+    private void drawShape(Shape shape, Color color, boolean filled) {
 
         graphics.setStroke(new BasicStroke(strokeWidth));
 
-        Color darkerColor = new Color(color.getRed(), color.getGreen(),color.getBlue(), Math.round(255 * alpha));
-        graphics.setColor(darkerColor);
-        graphics.fill(shape);
+        if (filled) {
+            Color darkerColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), Math.round(255 * alpha));
+            graphics.setColor(darkerColor);
+            graphics.fill(shape);
+        }
 
         graphics.setColor(color);
         graphics.draw(shape);
@@ -143,7 +147,7 @@ public class PolygonDraw {
         return new Polygon(px, py, contour.pointCount());
     }
 
-    private void drawContourWithHoles(com.github.randomdwi.polygonclipping.Polygon polygon, Contour contour, Color color, Set<Contour> drawnContours, boolean filledContour) {
+    private void drawContourWithHoles(com.github.randomdwi.polygonclipping.Polygon polygon, Contour contour, Color color, Set<Contour> drawnContours) {
 
         // draw the outer contour
         Polygon awtPolygon = contourToAwtPolygon(contour);
@@ -157,7 +161,7 @@ public class PolygonDraw {
             drawnContours.add(hole);
         });
 
-        drawShape(area, color);
+        drawShape(area, color, true);
         drawnContours.add(contour);
     }
 
@@ -174,5 +178,25 @@ public class PolygonDraw {
     private String getFileFormat(File outputFile) {
         String[] filenameParts = outputFile.getName().toLowerCase().split("\\.");
         return filenameParts[filenameParts.length - 1];
+    }
+
+    public static void savePolygonImage(int width, int height, com.github.randomdwi.polygonclipping.Polygon polygon, String filename) {
+        PolygonDraw draw = new PolygonDraw(width, height, polygon.boundingBox());
+        draw.drawPolygon(polygon, Color.BLUE);
+        try {
+            draw.save(new File(filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveContourImage(int width, int height, Contour contour, String filename) {
+        PolygonDraw draw = new PolygonDraw(width, height, contour.boundingBox());
+        draw.drawPolygon(com.github.randomdwi.polygonclipping.Polygon.from(contour), Color.BLUE);
+        try {
+            draw.save(new File(filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
