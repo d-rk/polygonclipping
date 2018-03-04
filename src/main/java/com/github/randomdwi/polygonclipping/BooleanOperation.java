@@ -377,26 +377,7 @@ public class BooleanOperation {
             }
         }
 
-        //TODO refactor sweepEventComparator
-        SweepEventComparator sec2 = new SweepEventComparator(true);                    // to compare events
-
-        // Due to overlapping edges the resultEvents array can be not wholly sorted
-        boolean sorted = false;
-        while (!sorted) {
-            sorted = true;
-
-            for (int i = 0; i < resultEvents.size() - 1; ++i) {
-                SweepEvent event = resultEvents.get(i);
-                SweepEvent nextEvent = resultEvents.get(i + 1);
-
-                if (sec2.compare(event, nextEvent) >= 0) {
-                    // swap
-                    resultEvents.set(i, nextEvent);
-                    resultEvents.set(i + 1, event);
-                    sorted = false;
-                }
-            }
-        }
+        resultEvents.sort(new SweepEventComparator(true));
 
         for (int i = 0; i < resultEvents.size(); ++i) {
             SweepEvent event = resultEvents.get(i);
