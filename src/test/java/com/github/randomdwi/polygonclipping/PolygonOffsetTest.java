@@ -53,9 +53,9 @@ public class PolygonOffsetTest {
 
         Polygon polygon = Polygon.from(contour);
 
-        Polygon offset = new PolygonOffset().createOffsetPolygon(contour, -1.0);
+        Polygon offset = new PolygonOffset().create(contour, -1.0);
 
-        PolygonDraw draw = new PolygonDraw(600, 600, offset.boundingBox().combine(polygon.boundingBox()));
+        PolygonDraw draw = new PolygonDraw(200, 200, offset.boundingBox().combine(polygon.boundingBox()));
         draw.setAlpha(0.3f);
         draw.setStrokeWidth(2);
         draw.drawPolygon(offset, Color.RED);
@@ -74,11 +74,11 @@ public class PolygonOffsetTest {
     @Test
     public void testCreateOffsetPolygonWithHoles() throws IOException {
 
-        Polygon polygon = new Polygon(PolygonOffsetTest.class.getResourceAsStream("/polygons/samples/polygonwithholes"));
+        Polygon polygon = new Polygon(PolygonOffsetTest.class.getResourceAsStream("/polygons/samples/polygonwithhole"));
 
-        Polygon offset = new PolygonOffset().createOffsetPolygon(polygon, 0.02);
+        Polygon offset = PolygonOffset.createOffsetPolygon(polygon, 0.2);
 
-        PolygonDraw draw = new PolygonDraw(600, 600, offset.boundingBox().combine(polygon.boundingBox()));
+        PolygonDraw draw = new PolygonDraw(200, 200, offset.boundingBox().combine(polygon.boundingBox()));
         draw.setAlpha(0.3f);
         draw.setStrokeWidth(2);
         draw.drawPolygon(offset, Color.RED);

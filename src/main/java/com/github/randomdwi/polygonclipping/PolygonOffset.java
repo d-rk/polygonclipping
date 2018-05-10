@@ -7,7 +7,6 @@ import com.github.randomdwi.polygonclipping.segment.Segment;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +19,17 @@ public class PolygonOffset {
 
     //An odd number so that one arc vertex will be exactly arcRadius from center.
     private int arcSegmentCount = 5;
+
+    /**
+     * Create offset polygon polygon.
+     *
+     * @param polygon the polygon
+     * @param offset  the offset
+     * @return offset polygon
+     */
+    public static Polygon createOffsetPolygon(Polygon polygon, double offset) {
+        return new PolygonOffset().create(polygon, offset);
+    }
 
     Contour createArcContour(Point center, double radius, Point arcStart, Point arcEnd) {
 
@@ -74,7 +84,14 @@ public class PolygonOffset {
         return contour;
     }
 
-    public Polygon createOffsetPolygon(Polygon polygon, double offset) throws IOException {
+    /**
+     * Create offset polygon polygon.
+     *
+     * @param polygon the polygon
+     * @param offset  the offset
+     * @return offset polygon
+     */
+    public Polygon create(Polygon polygon, double offset) {
 
         if (Point.isCloseTo(offset, 0.0)) {
             return polygon;
@@ -103,7 +120,7 @@ public class PolygonOffset {
     private Polygon createOffsetRecursive(Polygon polygon, double offset, Set<Contour> processed,
                                           Contour contour, boolean isHole) {
 
-        Polygon offsetContour = createOffsetPolygon(contour, offset, isHole);
+        Polygon offsetContour = create(contour, offset, isHole);
         processed.add(contour);
 
         final Polygon[] offsetPolygon = {offsetContour};
@@ -118,16 +135,16 @@ public class PolygonOffset {
         return offsetPolygon[0];
     }
 
-    public Polygon createOffsetPolygon(Contour contour, double offset) {
+    public Polygon create(Contour contour, double offset) {
 
         if (Point.isCloseTo(offset, 0.0)) {
             return Polygon.from(contour);
         }
 
-        return createOffsetPolygon(contour, offset, false);
+        return create(contour, offset, false);
     }
 
-    private Polygon createOffsetPolygon(Contour contour, double offset, boolean isHole) {
+    private Polygon create(Contour contour, double offset, boolean isHole) {
 
         List<Boolean> pointConvexity = getConvexity(contour.getPoints());
 

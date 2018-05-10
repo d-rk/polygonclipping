@@ -63,3 +63,15 @@ Polygon p = Polygon.from(Contour.from(outerContour), Contour.from(hole1), Contou
 ##### Result
 ![Polygon with holes](images/create_polygon_with_holes.png)
 
+#### Polygon Offset
+##### Code
+```java
+Polygon polygon = new Polygon(new File("/polygons/samples/polygonwithhole"));
+Polygon offset = PolygonOffset.createOffsetPolygon(polygon, 0.05);
+```
+##### Result
+| Offset=0.05   | Offset=0.1 | Offset=0.2 |
+| ---------- | ------------ | ---------- |
+| ![Polygon with hole offset](images/polygon_with_hole_offset.png) |![Polygon with hole offset 1](images/polygon_with_hole_offset_1.png)| ![Polygon with hole offset](images/polygon_with_hole_offset_2.png) |
+
+
