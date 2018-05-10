@@ -26,6 +26,8 @@ public class Polygon {
 
     /**
      * Instantiates an empty Polygon.
+     *
+     * @param contours the contours
      */
     public Polygon(List<Contour> contours) {
         this.contours = contours;
@@ -54,31 +56,60 @@ public class Polygon {
 
             // read the contours
             int contourCount = ReaderUtil.toInt(reader.readLine());
+            int readContours = 0;
+            String line;
 
-            for (int i = 0; i < contourCount; i++) {
+            while (reader.ready() && readContours < contourCount) {
+
                 Contour contour = new Contour();
                 contours.add(contour);
 
-                int pointCount = ReaderUtil.toInt(reader.readLine());
+                line = reader.readLine().trim();
+                if (line.startsWith("#")) {
+                    // skip comments
+                    continue;
+                }
 
-                for (int j = 0; j < pointCount; j++) {
-                    List<Double> coords = ReaderUtil.toDoubleList(reader.readLine());
+                int pointCount = ReaderUtil.toInt(line);
+                int readPoints = 0;
+
+                while (reader.ready() && readPoints < pointCount) {
+
+                    line = reader.readLine().trim();
+                    if (line.startsWith("#")) {
+                        // skip comments
+                        continue;
+                    }
+
+                    List<Double> coords = ReaderUtil.toDoubleList(line);
                     double px = coords.get(0);
                     double py = coords.get(1);
 
-                    if (j > 0 && px == contour.lastPoint().x && py == contour.lastPoint().y) {
+                    if (readPoints > 0 && px == contour.lastPoint().x && py == contour.lastPoint().y) {
                         continue;
                     }
-                    if (j == pointCount - 1 && px == contour.getPoint(0).x && py == contour.getPoint(0).y) {
+                    if (readPoints == pointCount - 1 && px == contour.getPoint(0).x && py == contour.getPoint(0).y) {
                         continue;
                     }
 
                     contour.add(new Point(px, py));
+                    readPoints++;
                 }
+
+                if (readPoints != pointCount) {
+                    throw new IllegalArgumentException("not enough points: " + readPoints + "<" + pointCount);
+                }
+
                 if (contour.pointCount() < 3) {
                     // not a valid contour, remove it
                     removeLastContour();
                 }
+
+                readContours++;
+            }
+
+            if (readContours != contourCount) {
+                throw new IllegalArgumentException("not enough contours: " + readContours + "<" + contourCount);
             }
 
             // read holes information
@@ -190,6 +221,34 @@ public class Polygon {
      * @return contours
      */
     public List<Contour> getContours() {
+        return contours;
+    }
+
+    /**
+     * Get a list of all external contours. i.e. all contours which are not holes.
+     *
+     * @return contours
+     */
+    public List<Contour> getExternalContours() {
+        return contours.stream().filter(c -> !c.isHole()).collect(Collectors.toList());
+    }
+
+    /**
+     * Get a list of all contours, ordered from outside to inside.
+     *
+     * @return contours
+     */
+    public List<Contour> getOrderedContours() {
+
+        List<Contour> contours = getExternalContours();
+
+        for (int i=0; i < contours.size(); i++) {
+            contours.get(i).getHoles().stream()
+                    .map(this::contour)
+                    .filter(h -> !contours.contains(h))
+                    .forEach(contours::add);
+        }
+
         return contours;
     }
 

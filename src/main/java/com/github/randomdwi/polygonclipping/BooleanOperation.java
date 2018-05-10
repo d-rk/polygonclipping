@@ -11,6 +11,7 @@ import com.github.randomdwi.polygonclipping.segment.SegmentComparator;
 import com.github.randomdwi.polygonclipping.sweepline.SweepEvent;
 import com.github.randomdwi.polygonclipping.sweepline.SweepEventComparator;
 import com.github.randomdwi.polygonclipping.sweepline.SweepLine;
+import com.github.randomdwi.polygonclipping.sweepline.SweepLineStatus;
 
 import java.util.*;
 
@@ -83,6 +84,9 @@ public class BooleanOperation {
         this.clipping = clip.copy();
         this.operation = operation;
         this.result = new Polygon();
+
+        //sweepLine.statusLine = new DrawingSweepLineStatus(new SegmentComparator(false), subject, clipping, "sweep-line");
+        sweepLine.statusLine = new SweepLineStatus(new SegmentComparator(false));
     }
 
     private Polygon execute() {
@@ -193,7 +197,7 @@ public class BooleanOperation {
      */
     private void processSegment(Segment s, PolygonType pt) {
 //        // if the two edge endpoints are equal the segment is dicarded
-//        if (s.degenerate ()) {
+//        if (s.degenerate()) {
 //            // This can be done as preprocessing to avoid "polygons" with less than 3 edges */
 //            return;
 //        }
@@ -228,7 +232,7 @@ public class BooleanOperation {
             return 0;
         }
 
-        if ((Intersection.Type.POINT.equals(intersections.type)) && ((le1.point.equals(le2.point)) || (le1.otherEvent.point.equals(le2.otherEvent.point)))) {
+        if ((Intersection.Type.POINT.equals(intersections.type)) && ((le1.point.isCloseTo(le2.point)) || (le1.otherEvent.point.isCloseTo(le2.otherEvent.point)))) {
             // the line segments intersect at an endpoint of both line segments
             return 0;
         }
@@ -239,11 +243,11 @@ public class BooleanOperation {
 
         // The line segments associated to le1 and le2 intersect
         if (Intersection.Type.POINT.equals(intersections.type)) {
-            if (!le1.point.equals(intersections.point) && !le1.otherEvent.point.equals(intersections.point)) {
+            if (!le1.point.isCloseTo(intersections.point) && !le1.otherEvent.point.isCloseTo(intersections.point)) {
                 // if the intersection point is not an endpoint of le1.segment ()
                 divideSegment(le1, intersections.point);
             }
-            if (!le2.point.equals(intersections.point) && !le2.otherEvent.point.equals(intersections.point)) {
+            if (!le2.point.isCloseTo(intersections.point) && !le2.otherEvent.point.isCloseTo(intersections.point)) {
                 // if the intersection point is not an endpoint of le2.segment ()
                 divideSegment(le2, intersections.point);
             }
@@ -252,7 +256,7 @@ public class BooleanOperation {
         // The line segments associated to le1 and le2 overlap
         List<SweepEvent> sortedEvents = new ArrayList<>();
 
-        if (le1.point.equals(le2.point)) {
+        if (le1.point.isCloseTo(le2.point)) {
             sortedEvents.add(null);
         } else if (sweepEventComparator.compare(le1, le2) < 0) {
             sortedEvents.add(le2);
@@ -261,7 +265,7 @@ public class BooleanOperation {
             sortedEvents.add(le1);
             sortedEvents.add(le2);
         }
-        if (le1.otherEvent.point.equals(le2.otherEvent.point)) {
+        if (le1.otherEvent.point.isCloseTo(le2.otherEvent.point)) {
             sortedEvents.add(null);
         } else if (sweepEventComparator.compare(le1.otherEvent, le2.otherEvent) < 0) {
             sortedEvents.add(le2.otherEvent);
@@ -372,31 +376,14 @@ public class BooleanOperation {
         List<SweepEvent> resultEvents = new ArrayList<>(sortedEvents.size());
 
         for (SweepEvent event : sortedEvents) {
+            // only left events are inResult
+            // add these events and their corresponding other events
             if ((event.left && event.inResult) || (!event.left && event.otherEvent.inResult)) {
                 resultEvents.add(event);
             }
         }
 
-        //TODO refactor sweepEventComparator
-        SweepEventComparator sec2 = new SweepEventComparator(true);                    // to compare events
-
-        // Due to overlapping edges the resultEvents array can be not wholly sorted
-        boolean sorted = false;
-        while (!sorted) {
-            sorted = true;
-
-            for (int i = 0; i < resultEvents.size() - 1; ++i) {
-                SweepEvent event = resultEvents.get(i);
-                SweepEvent nextEvent = resultEvents.get(i + 1);
-
-                if (sec2.compare(event, nextEvent) >= 0) {
-                    // swap
-                    resultEvents.set(i, nextEvent);
-                    resultEvents.set(i + 1, event);
-                    sorted = false;
-                }
-            }
-        }
+        resultEvents.sort(new SweepEventComparator(true));
 
         for (int i = 0; i < resultEvents.size(); ++i) {
             SweepEvent event = resultEvents.get(i);
@@ -447,7 +434,7 @@ public class BooleanOperation {
             Point initial = event.point;
             contour.add(initial);
 
-            while (!resultEvents.get(pos).otherEvent.point.equals(initial)) {
+            while (!resultEvents.get(pos).otherEvent.point.isCloseTo(initial)) {
                 processed.add(pos);
                 if (resultEvents.get(pos).left) {
                     resultEvents.get(pos).resultInOut = false;
@@ -473,7 +460,7 @@ public class BooleanOperation {
 
     private int nextPos(int pos, List<SweepEvent> resultEvents, Set<Integer> processed) {
         int newPos = pos + 1;
-        while (newPos < resultEvents.size() && resultEvents.get(newPos).point.equals(resultEvents.get(pos).point)) {
+        while (newPos < resultEvents.size() && resultEvents.get(newPos).point.isCloseTo(resultEvents.get(pos).point)) {
             if (!processed.contains(newPos)) {
                 return newPos;
             } else {
@@ -484,6 +471,11 @@ public class BooleanOperation {
         while (processed.contains(newPos)) {
             --newPos;
         }
+
+        if (newPos == -1) {
+            throw new IllegalStateException("cannot determine next position");
+        }
+
         return newPos;
     }
 }

@@ -3,6 +3,10 @@ package com.github.randomdwi.polygonclipping.geometry;
 import com.github.randomdwi.polygonclipping.segment.Segment;
 import lombok.Data;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Optional;
+
 import static com.github.randomdwi.polygonclipping.geometry.Intersection.Type.*;
 
 @Data
@@ -29,52 +33,54 @@ public class Intersection {
      */
     public Intersection(Segment segmentA, Segment segmentB) {
 
-        Point p0 = segmentA.pBegin;
-        Point d0 = new Point(segmentA.pEnd.x - p0.x, segmentA.pEnd.y - p0.y);
-        Point p1 = segmentB.pBegin;
-        Point d1 = new Point(segmentB.pEnd.x - p1.x, segmentB.pEnd.y - p1.y);
+        Point pointA0 = segmentA.pBegin;
+        Point vectorA = new Point(segmentA.pEnd.x - pointA0.x, segmentA.pEnd.y - pointA0.y);
+        Point pointB0 = segmentB.pBegin;
+        Point vectorB = new Point(segmentB.pEnd.x - pointB0.x, segmentB.pEnd.y - pointB0.y);
 
-        Point E = new Point(p1.x - p0.x, p1.y - p0.y);
-        double cross = d0.x * d1.y - d0.y * d1.x;
+        Point vectorA0_B0 = new Point(pointB0.x - pointA0.x, pointB0.y - pointA0.y);
+        double cross = vectorA.x * vectorB.y - vectorA.y * vectorB.x;
         double sqrCross = cross * cross;
-        double sqrLen0 = d0.x * d0.x + d0.y * d0.y;
-        double sqrLen1 = d1.x * d1.x + d1.y * d1.y;
+        double sqrLenVectorA = vectorA.x * vectorA.x + vectorA.y * vectorA.y;
+        double sqrLenVectorB = vectorB.x * vectorB.x + vectorB.y * vectorB.y;
 
-        if (sqrCross > EPSILON * sqrLen0 * sqrLen1) {
+        if (sqrCross > EPSILON * sqrLenVectorA * sqrLenVectorB) {
             // lines of the segments are not parallel
-            double s = (E.x * d1.y - E.y * d1.x) / cross;
+            double s = (vectorA0_B0.x * vectorB.y - vectorA0_B0.y * vectorB.x) / cross;
             if ((s < 0) || (s > 1)) {
                 type = NO_INTERSECTION;
                 return;
             }
-            double t = (E.x * d0.y - E.y * d0.x) / cross;
+            double t = (vectorA0_B0.x * vectorA.y - vectorA0_B0.y * vectorA.x) / cross;
             if ((t < 0) || (t > 1)) {
                 type = NO_INTERSECTION;
                 return;
             }
             // intersection of lines is a point on each segment
-            point = new Point(p0.x + s * d0.x, p0.y + s * d0.y);
-            snapPointToSegment(segmentA);
-            snapPointToSegment(segmentB);
-
+            point = new Point(pointA0.x + s * vectorA.x, pointA0.y + s * vectorA.y);
+            snapPointToClosestPoint(segmentA.pBegin, segmentA.pEnd, segmentB.pBegin, segmentB.pEnd);
 
             type = POINT;
             return;
         }
 
         // lines of the segments are parallel
-        double sqrLenE = E.x * E.x + E.y * E.y;
-        cross = E.x * d0.y - E.y * d0.x;
-        sqrCross = cross * cross;
-        if (sqrCross > EPSILON * sqrLen0 * sqrLenE) {
+        double sqrLenVectorA0_B0 = vectorA0_B0.x * vectorA0_B0.x + vectorA0_B0.y * vectorA0_B0.y;
+        double crossVectorA0_B0_vectorA = vectorA0_B0.x * vectorA.y - vectorA0_B0.y * vectorA.x;
+        double sqrCross2 = crossVectorA0_B0_vectorA * crossVectorA0_B0_vectorA;
+        double rectArea = sqrLenVectorA0_B0 * sqrLenVectorA;
+
+        // sqrCross2 == area of parallelogram spanned between vectorA0_B0 and vectorA
+        // rectArea == area of rectangle spanned by length of vectorA0_B0 and length of vectorA
+        if (sqrCross2 > EPSILON * rectArea && rectArea > EPSILON) {
             // lines of the segment are different
             type = NO_INTERSECTION;
             return;
         }
 
         // Lines of the segments are the same. Need to test for overlap of segments.
-        double s0 = (d0.x * E.x + d0.y * E.y) / sqrLen0;  // so = Dot (D0, E) * sqrLen0
-        double s1 = s0 + (d0.x * d1.x + d0.y * d1.y) / sqrLen0;  // s1 = s0 + Dot (D0, D1) * sqrLen0
+        double s0 = (vectorA.x * vectorA0_B0.x + vectorA.y * vectorA0_B0.y) / sqrLenVectorA;  // so = Dot (D0, E) * sqrLen0
+        double s1 = s0 + (vectorA.x * vectorB.x + vectorA.y * vectorB.y) / sqrLenVectorA;  // s1 = s0 + Dot (D0, D1) * sqrLen0
         double sMin = Math.min(s0, s1);
         double sMax = Math.max(s0, s1);
         double w0;
@@ -100,21 +106,21 @@ public class Intersection {
         }
 
         if (!NO_INTERSECTION.equals(type)) {
-            point = new Point(p0.x + w0 * d0.x, p0.y + w0 * d0.y);
-            snapPointToSegment(segmentA);
-            snapPointToSegment(segmentB);
+            point = new Point(pointA0.x + w0 * vectorA.x, pointA0.y + w0 * vectorA.y);
+            snapPointToClosestPoint(segmentA.pBegin, segmentA.pEnd, segmentB.pBegin, segmentB.pEnd);
             if (OVERLAPPING.equals(type)) {
-                pi1 = new Point(p0.x + w1 * d0.x, p0.y + w1 * d0.y);
+                pi1 = new Point(pointA0.x + w1 * vectorA.x, pointA0.y + w1 * vectorA.y);
             }
         }
     }
 
-    private void snapPointToSegment(Segment segment) {
-        if (point.dist(segment.pBegin) < EPSILON) {
-            point = segment.pBegin;
-        }
-        if (point.dist(segment.pEnd) < EPSILON) {
-            point = segment.pEnd;
+    private void snapPointToClosestPoint(Point... points) {
+
+        Optional<Point> minimum = Arrays.stream(points)
+                .min(Comparator.comparingDouble(p -> point.sqrDist(p)));
+
+        if (minimum.isPresent() && point.isCloseTo(minimum.get())) {
+            point = minimum.get();
         }
     }
 }
