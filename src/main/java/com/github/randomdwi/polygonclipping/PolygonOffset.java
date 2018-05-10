@@ -9,14 +9,17 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.BiFunction;
 
 public class PolygonOffset {
 
     private static final double TWO_PI = Math.PI * 2;
 
     //An odd number so that one arc vertex will be exactly arcRadius from center.
-    private int arcSegmentCount = 1;
+    private int arcSegmentCount = 5;
 
     Contour createArcContour(Point center, double radius, Point arcStart, Point arcEnd) {
 
@@ -71,7 +74,60 @@ public class PolygonOffset {
         return contour;
     }
 
-    public Polygon createOffsetPolygon(Contour contour, double offset) throws IOException {
+    public Polygon createOffsetPolygon(Polygon polygon, double offset) throws IOException {
+
+        if (Point.isCloseTo(offset, 0.0)) {
+            return polygon;
+        }
+
+        Set<Contour> processed = new HashSet<>();
+
+        final Polygon[] offsetPolygon = {polygon};
+
+        polygon.getOrderedContours().stream()
+                .filter(contour -> !processed.contains(contour))
+                .forEach(contour -> {
+
+            if (contour.isHole()) {
+                throw new IllegalStateException("should not be a hole");
+            }
+
+            Polygon offsetContour = createOffsetRecursive(polygon, offset, processed, contour, false);
+
+            offsetPolygon[0] = BooleanOperation.UNION(offsetPolygon[0], offsetContour);
+        });
+
+        return offsetPolygon[0];
+    }
+
+    private Polygon createOffsetRecursive(Polygon polygon, double offset, Set<Contour> processed,
+                                          Contour contour, boolean isHole) {
+
+        Polygon offsetContour = createOffsetPolygon(contour, offset, isHole);
+        processed.add(contour);
+
+        final Polygon[] offsetPolygon = {offsetContour};
+
+        contour.getHoles().stream()
+                .map(polygon::contour)
+                .forEach(holeContour -> {
+                    Polygon offsetHole = createOffsetRecursive(polygon, offset, processed, holeContour, !isHole);
+
+                    offsetPolygon[0] = BooleanOperation.DIFFERENCE(offsetPolygon[0], offsetHole);
+                });
+        return offsetPolygon[0];
+    }
+
+    public Polygon createOffsetPolygon(Contour contour, double offset) {
+
+        if (Point.isCloseTo(offset, 0.0)) {
+            return Polygon.from(contour);
+        }
+
+        return createOffsetPolygon(contour, offset, false);
+    }
+
+    private Polygon createOffsetPolygon(Contour contour, double offset, boolean isHole) {
 
         List<Boolean> pointConvexity = getConvexity(contour.getPoints());
 
@@ -95,19 +151,29 @@ public class PolygonOffset {
             }
         }
 
-        return union(contour, offsetContours);
+        boolean isOuterOffsetContour = (offset > 0);
+
+        if ((isOuterOffsetContour && !isHole) || (!isOuterOffsetContour && isHole)) {
+            return apply(contour, BooleanOperation::UNION, offsetContours);
+        } else {
+            return apply(contour, BooleanOperation::DIFFERENCE, offsetContours);
+        }
     }
 
-    private Polygon union(Contour contour, List<Contour> offsetContours) {
+    private Polygon apply(Contour contour, BiFunction<Polygon, Polygon, Polygon> operation, List<Contour> offsetContours) {
 
-        Polygon polygon = Polygon.from(contour);
+        PolygonDraw.drawPolygonImage(200, 200, new Polygon(offsetContours), "offsetContours.png");
+
+        Polygon polygon = Polygon.from(contour.copy());
         int i = 0;
         for (Contour offsetContour : offsetContours) {
-            PolygonDraw.savePolygonImage(200, 200, polygon, "subject" + i + ".png");
-            PolygonDraw.savePolygonImage(200, 200, Polygon.from(offsetContour), "clipping" + i + ".png");
+            PolygonDraw.drawPolygonImage(200, 200, polygon, "subject" + i + ".png");
+            PolygonDraw.drawPolygonImage(200, 200, Polygon.from(offsetContour), "clipping" + i + ".png");
+
+            Polygon tmp;
 
             try {
-                polygon = BooleanOperation.UNION(polygon, Polygon.from(offsetContour));
+                tmp = operation.apply(polygon, Polygon.from(offsetContour));
             } catch (Exception ex) {
                 System.out.println("ill");
                 try {
@@ -119,8 +185,9 @@ public class PolygonOffset {
                 throw ex;
             }
 
+            polygon = tmp;
 
-            PolygonDraw.savePolygonImage(200, 200, polygon, "result" + i++ + ".png");
+            PolygonDraw.drawPolygonImage(200, 200, polygon, "result" + i++ + ".png");
         }
 
         return polygon;

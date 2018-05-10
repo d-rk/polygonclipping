@@ -1,5 +1,6 @@
 package com.github.randomdwi.polygonclipping.segment;
 
+import com.github.randomdwi.polygonclipping.geometry.Point;
 import com.github.randomdwi.polygonclipping.geometry.Triangle;
 import com.github.randomdwi.polygonclipping.enums.PolygonType;
 import com.github.randomdwi.polygonclipping.sweepline.SweepEvent;
@@ -27,18 +28,18 @@ public class SegmentComparator implements Comparator<SweepEvent> {
         if (le1.equals(le2)) {
             return 0;
         }
-        if (Triangle.signedArea(le1.point, le1.otherEvent.point, le2.point) != 0 ||
-                Triangle.signedArea(le1.point, le1.otherEvent.point, le2.otherEvent.point) != 0) {
+        if (!Triangle.areaCloseToZero(le1.point, le1.otherEvent.point, le2.point) ||
+                !Triangle.areaCloseToZero(le1.point, le1.otherEvent.point, le2.otherEvent.point)) {
             // Segments are not collinear
             // If they share their left endpoint use the right endpoint to sort
-            if (le1.point.equals(le2.point)) {
+            if (le1.point.isCloseTo(le2.point)) {
                 return le1.below(le2.otherEvent.point) ? -1 : 1;
             }
 
             //TODO cleanup
             if (!forHoleAlgorithm) {
                 // Different left endpoint: use the left endpoint to sort
-                if (le1.point.x == le2.point.x) {
+                if (Point.isCloseTo(le1.point.x, le2.point.x)) {
                     return le1.point.y < le2.point.y ? -1 : 1;
                 }
                 SweepEventComparator comp = new SweepEventComparator(false);

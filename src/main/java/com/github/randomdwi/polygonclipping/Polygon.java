@@ -26,6 +26,8 @@ public class Polygon {
 
     /**
      * Instantiates an empty Polygon.
+     *
+     * @param contours the contours
      */
     public Polygon(List<Contour> contours) {
         this.contours = contours;
@@ -219,6 +221,34 @@ public class Polygon {
      * @return contours
      */
     public List<Contour> getContours() {
+        return contours;
+    }
+
+    /**
+     * Get a list of all external contours. i.e. all contours which are not holes.
+     *
+     * @return contours
+     */
+    public List<Contour> getExternalContours() {
+        return contours.stream().filter(c -> !c.isHole()).collect(Collectors.toList());
+    }
+
+    /**
+     * Get a list of all contours, ordered from outside to inside.
+     *
+     * @return contours
+     */
+    public List<Contour> getOrderedContours() {
+
+        List<Contour> contours = getExternalContours();
+
+        for (int i=0; i < contours.size(); i++) {
+            contours.get(i).getHoles().stream()
+                    .map(this::contour)
+                    .filter(h -> !contours.contains(h))
+                    .forEach(contours::add);
+        }
+
         return contours;
     }
 

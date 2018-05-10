@@ -11,6 +11,7 @@ import com.github.randomdwi.polygonclipping.segment.SegmentComparator;
 import com.github.randomdwi.polygonclipping.sweepline.SweepEvent;
 import com.github.randomdwi.polygonclipping.sweepline.SweepEventComparator;
 import com.github.randomdwi.polygonclipping.sweepline.SweepLine;
+import com.github.randomdwi.polygonclipping.sweepline.SweepLineStatus;
 
 import java.util.*;
 
@@ -83,6 +84,9 @@ public class BooleanOperation {
         this.clipping = clip.copy();
         this.operation = operation;
         this.result = new Polygon();
+
+        //sweepLine.statusLine = new DrawingSweepLineStatus(new SegmentComparator(false), subject, clipping, "sweep-line");
+        sweepLine.statusLine = new SweepLineStatus(new SegmentComparator(false));
     }
 
     private Polygon execute() {
@@ -193,7 +197,7 @@ public class BooleanOperation {
      */
     private void processSegment(Segment s, PolygonType pt) {
 //        // if the two edge endpoints are equal the segment is dicarded
-//        if (s.degenerate ()) {
+//        if (s.degenerate()) {
 //            // This can be done as preprocessing to avoid "polygons" with less than 3 edges */
 //            return;
 //        }
@@ -372,6 +376,8 @@ public class BooleanOperation {
         List<SweepEvent> resultEvents = new ArrayList<>(sortedEvents.size());
 
         for (SweepEvent event : sortedEvents) {
+            // only left events are inResult
+            // add these events and their corresponding other events
             if ((event.left && event.inResult) || (!event.left && event.otherEvent.inResult)) {
                 resultEvents.add(event);
             }
@@ -428,7 +434,7 @@ public class BooleanOperation {
             Point initial = event.point;
             contour.add(initial);
 
-            while (!resultEvents.get(pos).otherEvent.point.equals(initial)) {
+            while (!resultEvents.get(pos).otherEvent.point.isCloseTo(initial)) {
                 processed.add(pos);
                 if (resultEvents.get(pos).left) {
                     resultEvents.get(pos).resultInOut = false;
@@ -454,7 +460,7 @@ public class BooleanOperation {
 
     private int nextPos(int pos, List<SweepEvent> resultEvents, Set<Integer> processed) {
         int newPos = pos + 1;
-        while (newPos < resultEvents.size() && resultEvents.get(newPos).point.equals(resultEvents.get(pos).point)) {
+        while (newPos < resultEvents.size() && resultEvents.get(newPos).point.isCloseTo(resultEvents.get(pos).point)) {
             if (!processed.contains(newPos)) {
                 return newPos;
             } else {

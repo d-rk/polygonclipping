@@ -1,5 +1,6 @@
 package com.github.randomdwi.polygonclipping.sweepline;
 
+import com.github.randomdwi.polygonclipping.geometry.Point;
 import com.github.randomdwi.polygonclipping.geometry.Triangle;
 
 import java.util.Comparator;
@@ -25,14 +26,14 @@ public class SweepEventComparator implements Comparator<SweepEvent> {
 
         int direction = reverse ? -1 : 1;
 
-        if (e1.point.x != e2.point.x) {
+        if (!Point.isCloseTo(e1.point.x, e2.point.x)) {
             // Different x-coordinate
             // smaller x-coordinate comes first
             return (e1.point.x < e2.point.x) ? direction : -direction;
         }
 
         // Different points, but same x-coordinate. The event with lower y-coordinate is processed first
-        if (e1.point.y != e2.point.y) {
+        if (!Point.isCloseTo(e1.point.y, e2.point.y)) {
             return (e1.point.y < e2.point.y) ? direction : -direction;
         }
 
@@ -42,7 +43,7 @@ public class SweepEventComparator implements Comparator<SweepEvent> {
         }
 
         // Same point, both events are left endpoints or both are right endpoints.
-        if (Triangle.signedArea(e1.point, e1.otherEvent.point, e2.otherEvent.point) != 0) { // not collinear
+        if (!Triangle.areaCloseToZero(e1.point, e1.otherEvent.point, e2.otherEvent.point)) { // not collinear
             if (reverse) {
                 return e1.below(e2.otherEvent.point) ? direction : -direction;
             } else {

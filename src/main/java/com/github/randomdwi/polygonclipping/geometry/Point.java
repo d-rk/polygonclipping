@@ -49,7 +49,7 @@ public class Point {
      * Check if this point is close to given point.
      *
      * @param point comparison point
-     * @return squared distance < EPSILON
+     * @return squared distance smaller than EPSILON
      */
     public boolean isCloseTo(Point point) {
         return sqrDist(point) < EPSILON;

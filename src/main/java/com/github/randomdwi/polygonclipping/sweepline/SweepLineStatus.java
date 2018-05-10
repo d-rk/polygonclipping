@@ -7,7 +7,7 @@ import java.util.TreeSet;
 
 public class SweepLineStatus {
 
-    private TreeSet<SweepEvent> SL;
+    protected TreeSet<SweepEvent> SL;
 
     /**
      * Instantiates a new Sweep line status.

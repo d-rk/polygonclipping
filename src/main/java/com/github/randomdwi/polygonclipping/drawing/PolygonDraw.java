@@ -2,6 +2,7 @@ package com.github.randomdwi.polygonclipping.drawing;
 
 import com.github.randomdwi.polygonclipping.geometry.BoundingBox;
 import com.github.randomdwi.polygonclipping.geometry.Contour;
+import com.github.randomdwi.polygonclipping.geometry.Point;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -12,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class PolygonDraw {
 
@@ -59,16 +59,10 @@ public class PolygonDraw {
      */
     public void drawPolygon(com.github.randomdwi.polygonclipping.Polygon polygon, Color color) {
 
-        // sort contours so that external contour is drawn before its holes
-        java.util.List<Contour> contours = polygon.getContours().stream().filter(c -> !c.isHole()).collect(Collectors.toList());
-
-        for (int i=0; i < contours.size(); i++) {
-            contours.get(i).getHoles().stream().map(polygon::contour).filter(h -> !contours.contains(h)).forEach(contours::add);
-        }
-
         Set<Contour> drawnContours = new HashSet<>();
 
-        contours.forEach(c -> {
+        // sort contours so that external contour is drawn before its holes
+        polygon.getOrderedContours().forEach(c -> {
             if (!drawnContours.contains(c)) {
                 drawContourWithHoles(polygon, c, color, drawnContours);
             } else {
@@ -162,6 +156,7 @@ public class PolygonDraw {
         });
 
         drawShape(area, color, true);
+        drawShape(awtPolygon, color, false);
         drawnContours.add(contour);
     }
 
@@ -180,7 +175,7 @@ public class PolygonDraw {
         return filenameParts[filenameParts.length - 1];
     }
 
-    public static void savePolygonImage(int width, int height, com.github.randomdwi.polygonclipping.Polygon polygon, String filename) {
+    public static void drawPolygonImage(int width, int height, com.github.randomdwi.polygonclipping.Polygon polygon, String filename) {
         PolygonDraw draw = new PolygonDraw(width, height, polygon.boundingBox());
         draw.drawPolygon(polygon, Color.BLUE);
         try {
@@ -190,7 +185,7 @@ public class PolygonDraw {
         }
     }
 
-    public static void saveContourImage(int width, int height, Contour contour, String filename) {
+    public static void drawContourImage(int width, int height, Contour contour, String filename) {
         PolygonDraw draw = new PolygonDraw(width, height, contour.boundingBox());
         draw.drawPolygon(com.github.randomdwi.polygonclipping.Polygon.from(contour), Color.BLUE);
         try {
@@ -198,5 +193,15 @@ public class PolygonDraw {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void drawLine(Point pointA, Point pointB, Color color, double alpha) {
+        graphics.setStroke(new BasicStroke(strokeWidth));
+        graphics.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)Math.round(255 * alpha)));
+        graphics.drawLine(mapXToImage(pointA.x), mapYToImage(pointA.y), mapXToImage(pointB.x), mapYToImage(pointB.y));
+    }
+
+    public void drawPoint(Point point, Color color, double alpha) {
+        drawLine(point, point, color, alpha);
     }
 }
